@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NFL Scouting Board — WR · TE · RB</title>
+  <meta name="description" content="Fiches tactiques et techniques des postes Wide Receiver, Tight End et Running Back pour coachs — style carte FIFA." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Teko:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="field-bg" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">🏈</span>
+      <div>
+        <h1>NFL Scouting Board</h1>
+        <p class="subtitle">Analyse tactique des postes offensifs — <em>Coaches edition</em></p>
+      </div>
+    </div>
+    <div class="legend" id="legend">
+      <span class="legend-item"><b>OVR</b> Note globale <i>(Overall)</i></span>
+      <span class="legend-item"><b>PHY</b> Physique</span>
+      <span class="legend-item"><b>TEC</b> Technique</span>
+    </div>
+  </header>
+
+  <!-- Vue sélection : les 3 postes -->
+  <main id="selection" class="selection" aria-label="Sélection du poste">
+    <p class="hint">Cliquez sur un poste pour zoomer sur sa fiche d'analyse.</p>
+    <div class="cards-grid" id="cardsGrid"><!-- cartes injectées par JS --></div>
+  </main>
+
+  <!-- Vue détail : fiche zoomée d'un poste -->
+  <section id="detail" class="detail" aria-hidden="true">
+    <button class="back-btn" id="backBtn" aria-label="Retour à la sélection">← Retour</button>
+    <div class="detail-inner" id="detailInner"><!-- injecté par JS --></div>
+  </section>
+
+  <footer class="footer">
+    <p>Outil d'aide à l'évaluation — données illustratives, barème 0–99 (style <em>Ultimate Team</em>).</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
