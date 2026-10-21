@@ -180,6 +180,33 @@
     ]
   };
 
+  /* ---------- Photo du joueur (avec repli "avatar initiales") ----------
+     - Si le joueur a un champ player.photo (chemin d'image), on l'affiche.
+     - Sinon (ou si l'image est introuvable), on génère un avatar rond
+       avec les initiales, teinté à la couleur de l'équipe.
+     Pour mettre de vraies photos : déposez un fichier dans img/ et renseignez
+     "photo" dans ROSTERS (data.js), ex: photo:"img/hill.png".              */
+  function initials(name) {
+    const parts = String(name).replace(/[^A-Za-zÀ-ÿ.\s]/g, "").split(/[.\s]+/).filter(Boolean);
+    if (!parts.length) return "??";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  function avatarHTML(pl, team) {
+    const col = (team && team.color) || "#444";
+    return `<span class="fd-avatar" style="--ac:${col}">${initials(pl.player.name)}</span>`;
+  }
+  function playerPhoto(pl, team) {
+    const src = pl.player.photo;
+    if (src) {
+      // L'image remplace l'avatar ; si elle échoue, on retombe sur les initiales.
+      const fb = avatarHTML(pl, team).replace(/"/g, "&quot;");
+      return `<img class="fd-img" src="${src}" alt="${pl.player.name}"
+        onerror="this.outerHTML='${fb}'" />`;
+    }
+    return avatarHTML(pl, team);
+  }
+
   /* ---------- Palier de carte FIFA selon la note globale ---------- */
   function cardTier(ov) {
     if (ov >= 90) return "tier-elite";   // "icône" / or spécial
@@ -205,7 +232,7 @@
           <div class="fdisc ${cardTier(pl.overall)}">
             <div class="fd-shine"></div>
             <span class="fd-ovr">${pl.overall}</span>
-            <span class="fd-emoji">${pl.emoji}</span>
+            <div class="fd-photo">${playerPhoto(pl, team)}</div>
             <span class="fd-pos">${pl.abbr}</span>
             <span class="fd-num">#${pl.player.number}</span>
           </div>
