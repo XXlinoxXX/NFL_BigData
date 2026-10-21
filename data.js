@@ -443,3 +443,94 @@ const TEAMS = {
   }
 };
 
+
+/* =========================================================================
+   PLAYBOOKS — 5 plans de jeu offensifs simulables.
+   Chaque playbook définit, pour chaque poste interactif (WR / TE / RB), un
+   TRACÉ (route) exprimé comme une liste de points {x,y} en % du terrain,
+   dans le repère de l'ATTAQUE (équipe à gauche). Le premier point de chaque
+   tracé correspond à la position de départ de la pastille (= LAYOUT).
+   Pour l'équipe de DROITE (symétrique), app.js miroite x -> 100 - x.
+
+   - routes : { wr:[...], te:[...], rb:[...] }  (postes dans l'ordre WR,TE,RB)
+   - ball   : { from, to } indices/cibles du ballon (snap -> cible du QB)
+              `target` = poste visé par la passe ("wr"|"te"|"rb"), ou null
+              pour une course (handoff) : le ballon suit alors ce poste.
+   Le point de départ du QB (snap) est fixe (voir QB_SPOT).
+   ========================================================================= */
+
+// Point de snap du QB (figurant), repère attaque gauche.
+const QB_SPOT = { x: 37, y: 50 };
+
+const PLAYBOOKS = [
+  {
+    id: "four-verts",
+    name: "Four Verticals",
+    nameFr: "Quatre verticales",
+    emoji: "🚀",
+    desc: "Tous les receveurs attaquent le fond du terrain. Étire la couverture en profondeur, cherche le 1-contre-1 vertical.",
+    carrier: "wr",                 // poste qui reçoit le ballon
+    play: "pass",
+    routes: {
+      wr: [ {x:42,y:10}, {x:55,y:9}, {x:72,y:8} ],       // go route (haut)
+      te: [ {x:40,y:72}, {x:52,y:60}, {x:66,y:46} ],     // seam
+      rb: [ {x:28,y:50}, {x:40,y:54}, {x:54,y:62} ]      // wheel/checkdown
+    }
+  },
+  {
+    id: "mesh",
+    name: "Mesh Concept",
+    nameFr: "Concept Mesh",
+    emoji: "🔀",
+    desc: "Deux tracés croisés courts (drag) créent un rub naturel. Solide contre la couverture homme, YAC en espace.",
+    carrier: "te",
+    play: "pass",
+    routes: {
+      wr: [ {x:42,y:10}, {x:46,y:30}, {x:52,y:62} ],     // drag vers le bas
+      te: [ {x:40,y:72}, {x:46,y:52}, {x:54,y:24} ],     // drag vers le haut (croise)
+      rb: [ {x:28,y:50}, {x:34,y:40}, {x:40,y:26} ]      // swing vers le flat haut
+    }
+  },
+  {
+    id: "power-run",
+    name: "Power Run",
+    nameFr: "Course de puissance",
+    emoji: "🐏",
+    desc: "Handoff au RB entre les tacles. Le TE scelle le bord, le WR crack-back. Jeu au sol de volume.",
+    carrier: "rb",
+    play: "run",
+    routes: {
+      wr: [ {x:42,y:10}, {x:46,y:22}, {x:50,y:34} ],     // crack block vers l'intérieur
+      te: [ {x:40,y:72}, {x:48,y:74}, {x:56,y:76} ],     // down block, scelle le bord
+      rb: [ {x:28,y:50}, {x:44,y:54}, {x:62,y:58}, {x:80,y:54} ] // course entre les tacles
+    }
+  },
+  {
+    id: "screen",
+    name: "RB Screen",
+    nameFr: "Écran au RB",
+    emoji: "🧱",
+    desc: "Fausse protection puis passe courte au RB derrière un mur de bloqueurs. Piège le pass-rush agressif.",
+    carrier: "rb",
+    play: "pass",
+    routes: {
+      wr: [ {x:42,y:10}, {x:48,y:14}, {x:58,y:20} ],     // bloc downfield
+      te: [ {x:40,y:72}, {x:44,y:66}, {x:50,y:58} ],     // se replie pour escorter
+      rb: [ {x:28,y:50}, {x:30,y:60}, {x:42,y:66}, {x:60,y:68} ] // reçoit l'écran puis remonte
+    }
+  },
+  {
+    id: "pa-boot",
+    name: "PA Bootleg",
+    nameFr: "Play-action bootleg",
+    emoji: "🎭",
+    desc: "Feinte de course, le QB roule sur le bord. Tracés à flot haut/bas : lecture haut-bas facile, protège le QB mobile.",
+    carrier: "te",
+    play: "pass",
+    routes: {
+      wr: [ {x:42,y:10}, {x:54,y:12}, {x:70,y:16} ],     // comeback profond
+      te: [ {x:40,y:72}, {x:50,y:78}, {x:64,y:80} ],     // flat / out côté bootleg
+      rb: [ {x:28,y:50}, {x:30,y:66}, {x:34,y:80} ]      // fuite dans le flat bas
+    }
+  }
+];
