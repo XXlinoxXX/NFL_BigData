@@ -67,15 +67,16 @@
      Home à gauche (près de ses yards), Visitors à droite.
      x = horizontal, y = vertical (haut/bas).                            */
   const LAYOUT = {
+    // Vue du dessus : ligne d'engagement ~ x=46. Attaque (home) à gauche.
     home: [
-      { x: 22, y: 15 },  // WR (large, tout en haut)
-      { x: 43, y: 28 },  // TE (rapproché, au bout de la ligne)
-      { x: 26, y: 50 }   // RB (backfield, derrière le QB)
+      { x: 42, y: 10 },  // WR (large, tout en haut, sur la ligne)
+      { x: 40, y: 72 },  // TE (bout de ligne, côté bas)
+      { x: 28, y: 50 }   // RB (backfield profond, derrière le QB)
     ],
     away: [
-      { x: 72, y: 15 },  // WR (ici : receveur côté défense opposé, en haut)
-      { x: 66, y: 28 },  // TE
-      { x: 78, y: 50 }   // RB
+      { x: 58, y: 10 },  // WR (large, haut), symétrique du home
+      { x: 60, y: 72 },  // TE (bout de ligne, bas)
+      { x: 76, y: 50 }   // RB (backfield profond)
     ]
   };
 

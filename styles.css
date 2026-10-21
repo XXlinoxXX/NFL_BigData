@@ -73,94 +73,14 @@ body {
 .hud-right .hud-box { text-align: right; }
 @media (max-width: 780px){ .hud { position: static; flex-direction: row; justify-content: center; margin-bottom: 14px; } .hud-right { align-items: stretch; } }
 
-/* Terrain en perspective */
-.field-wrap { max-width: 1180px; margin: 0 auto; perspective: 1400px; }
+/* Terrain — vue du dessus (à plat) */
+.field-wrap { max-width: 1120px; margin: 0 auto; }
 
-/* ---- STADE : conteneur incliné qui porte terrain + gradins ---- */
-.stadium {
-  position: relative;
-  width: 100%;
-  transform: rotateX(42deg);
-  transform-style: preserve-3d;
-  margin: clamp(90px, 16vw, 230px) auto clamp(120px, 20vw, 280px);
-}
-
-/* =================== BOL DU STADE (tribunes 3D inclinées) =================== */
-.bowl { position: absolute; inset: 0; transform-style: preserve-3d; z-index: 0; }
-
-/* Texture commune des gradins : liseré lumineux haut + rangées de sièges +
-   spectateurs (points) + base sombre. Réutilisée par tribunes et coins. */
-.stand, .corner {
-  position: absolute; overflow: hidden;
-  background:
-    /* bandeau lumineux bleu en haut de tribune */
-    linear-gradient(180deg, rgba(90,170,255,.9) 0, rgba(90,170,255,0) 7%),
-    /* structure claire en crête */
-    linear-gradient(180deg, #c9d2e4 0, #c9d2e4 3%, rgba(201,210,228,0) 10%),
-    /* spectateurs : petits points clairs multicolores */
-    radial-gradient(circle at 22% 28%, rgba(255,255,255,.18) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 68% 52%, rgba(150,200,255,.18) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 44% 78%, rgba(255,235,200,.16) 0 1px, transparent 1.5px),
-    /* rangées de sièges (paliers sombres bleutés) */
-    repeating-linear-gradient(180deg, #3a4663 0 5px, #2b3550 5px 10px),
-    /* dégradé de profondeur (plus clair en haut) */
-    linear-gradient(180deg, #46527a 0, #222a42 55%, #141a2c 100%);
-  background-size: 100% 100%, 100% 100%, 8px 8px, 10px 10px, 12px 12px, 100% 10px, 100% 100%;
-  box-shadow: inset 0 0 70px rgba(0,0,0,.5);
-  border-top: 2px solid rgba(201,210,228,.85);   /* crête structurelle claire */
-}
-.stand::after, .corner::after { /* ombre portée vers le terrain (bas de tribune) */
-  content:""; position:absolute; inset:0; pointer-events:none;
-  background: linear-gradient(0deg, rgba(0,0,0,.55), transparent 45%);
-}
-
-/* --- Les 4 tribunes, ancrées au bord du terrain puis inclinées vers le haut.
-   transform-origin au bord commun avec le terrain → effet "bol" montant. --- */
-.stand-top {
-  left: 0; right: 0; bottom: 100%; height: 62%;
-  transform-origin: bottom center;
-  transform: rotateX(-72deg);
-}
-.stand-bottom {
-  left: 0; right: 0; top: 100%; height: 70%;
-  transform-origin: top center;
-  transform: rotateX(72deg);
-}
-.stand-left {
-  top: 0; bottom: 0; right: 100%; width: 34%;
-  transform-origin: right center;
-  transform: rotateY(72deg);
-}
-.stand-right {
-  top: 0; bottom: 0; left: 100%; width: 34%;
-  transform-origin: left center;
-  transform: rotateY(-72deg);
-}
-/* teinte d'équipe sur les tribunes latérales */
-.stand-left  { box-shadow: inset 0 0 70px rgba(0,0,0,.5), inset 10px 0 50px rgba(47,109,246,.22); }
-.stand-right { box-shadow: inset 0 0 70px rgba(0,0,0,.5), inset -10px 0 50px rgba(224,57,59,.22); }
-
-/* --- Coins : panneaux qui ferment l'anneau entre deux tribunes. --- */
-.corner { width: 42%; height: 46%; }
-.corner-tl { right: 100%; bottom: 100%; transform-origin: bottom right; transform: rotateX(-72deg) rotateY(72deg); }
-.corner-tr { left: 100%;  bottom: 100%; transform-origin: bottom left;  transform: rotateX(-72deg) rotateY(-72deg); }
-.corner-bl { right: 100%; top: 100%;    transform-origin: top right;    transform: rotateX(72deg) rotateY(72deg); }
-.corner-br { left: 100%;  top: 100%;    transform-origin: top left;     transform: rotateX(72deg) rotateY(-72deg); }
-
-/* halo de projecteurs (coins hauts) — éclairage bleu nocturne */
-.floodlight {
-  position: absolute; z-index: 0; width: 55%; height: 75%; top: -55%;
-  pointer-events: none; filter: blur(10px); opacity: .45;
-}
-.fl-tl { left: -16%; background: radial-gradient(circle at 25% 25%, rgba(140,190,255,.55), transparent 62%); }
-.fl-tr { right: -16%; background: radial-gradient(circle at 75% 25%, rgba(140,190,255,.55), transparent 62%); }
-
+/* ---- VUE DU CIEL : terrain à plat, vu de dessus ---- */
 .field {
-  position: relative; z-index: 2;
-  transform: translateZ(1px);          /* le terrain passe devant les gradins */
-  transform-style: preserve-3d;
+  position: relative;
+  margin: clamp(16px, 3vw, 34px) auto clamp(10px, 2vw, 24px);
 }
-.stand { transform: translateZ(-2px); }  /* gradins légèrement en retrait */
 .field-turf {
   position: relative;
   aspect-ratio: 16 / 9;
@@ -215,8 +135,6 @@ body {
 
 .puck {
   position: absolute; transform: translate(-50%, -50%);
-  /* annule l'inclinaison du terrain pour rester lisible face caméra */
-  transform-style: preserve-3d;
   cursor: pointer; border: none; background: none; color: var(--text);
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   animation: pop .45s both;
@@ -224,14 +142,11 @@ body {
 @keyframes pop { from { opacity:0; transform: translate(-50%,-30%) scale(.7);} to {opacity:1;} }
 .puck:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; border-radius: 12px; }
 
-/* on redresse le contenu de la pastille (contre-rotation du terrain) */
 .puck-stand {
-  transform: rotateX(-42deg);
-  transform-origin: bottom center;
   display: flex; flex-direction: column; align-items: center; gap: 6px;
-  transition: transform .25s ease;
+  transition: transform .2s ease;
 }
-.puck:hover .puck-stand { transform: rotateX(-42deg) translateY(-8px) scale(1.06); }
+.puck:hover .puck-stand { transform: translateY(-6px) scale(1.07); }
 
 .puck-disc {
   width: clamp(46px, 7vw, 74px); height: clamp(46px, 7vw, 74px); border-radius: 50%;
@@ -275,9 +190,9 @@ body {
 .puck.filler.away .puck-disc { box-shadow: 0 6px 14px rgba(0,0,0,.5), inset 0 0 0 2px rgba(224,57,59,.65); }
 .filler-pos { font-family: "Teko"; font-weight: 700; font-size: clamp(11px, 1.7vw, 16px); color: #cfd8e6; }
 .puck.filler .puck-num { font-size: 11px; top: -5px; right: -5px; padding: 0 5px; }
-.puck.filler:hover .puck-stand { transform: rotateX(-42deg); }  /* pas d'effet survol */
+.puck.filler:hover .puck-stand { transform: none; }  /* pas d'effet survol */
 
-.field-hint { text-align: center; color: var(--muted); font-size: 15px; margin-top: -30px; }
+.field-hint { text-align: center; color: var(--muted); font-size: 15px; margin-top: 16px; }
 .field-hint span { color: #7f93ac; }
 
 /* ============================ DETAIL (ZOOM) ============================ */
