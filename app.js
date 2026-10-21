@@ -21,6 +21,8 @@
   const bannerAway  = document.getElementById("bannerAway");   // DROITE = extérieur
   const rosterHome  = document.getElementById("rosterHome");
   const rosterAway  = document.getElementById("rosterAway");
+  const navPlaybook = document.getElementById("navPlaybook");
+  const navAnalytics= document.getElementById("navAnalytics");
 
   /* ---------- Helpers ---------- */
   function rateClass(v) {
@@ -244,6 +246,10 @@
     detail.style.setProperty("--c1", pos.accent);
     detail.style.setProperty("--c2", pos.accent2);
 
+    // Onglet actif : ANALYTICS quand on consulte la fiche d'un joueur
+    navPlaybook.classList.remove("active");
+    navAnalytics.classList.add("active");
+
     fieldView.classList.add("hidden");
     detail.setAttribute("aria-hidden", "false");
     void detail.offsetWidth;            // reflow
@@ -260,6 +266,10 @@
   }
 
   function closeDetail() {
+    // Retour au terrain : onglet actif = PLAYBOOK
+    navAnalytics.classList.remove("active");
+    navPlaybook.classList.add("active");
+
     detail.classList.remove("active");
     fieldView.classList.remove("hidden");
     setTimeout(() => detail.setAttribute("aria-hidden", "true"), 400);
