@@ -74,12 +74,63 @@ body {
 @media (max-width: 780px){ .hud { position: static; flex-direction: row; justify-content: center; margin-bottom: 14px; } .hud-right { align-items: stretch; } }
 
 /* Terrain en perspective */
-.field-wrap { max-width: 1120px; margin: 0 auto; perspective: 1400px; }
-.field {
+.field-wrap { max-width: 1180px; margin: 0 auto; perspective: 1400px; }
+
+/* ---- STADE : conteneur incliné qui porte terrain + gradins ---- */
+.stadium {
+  position: relative;
+  width: 100%;
   transform: rotateX(42deg);
   transform-style: preserve-3d;
-  margin: clamp(30px, 7vw, 90px) auto clamp(60px, 12vw, 150px);
+  margin: clamp(40px, 8vw, 110px) auto clamp(70px, 13vw, 160px);
 }
+
+/* Les gradins : grands panneaux placés DERRIÈRE le terrain, débordant
+   sur chaque côté pour combler le vide. Texture "foule" + structure béton. */
+.stand {
+  position: absolute; z-index: 0; overflow: hidden;
+  background:
+    /* spectateurs (petits points clairs) */
+    radial-gradient(circle at 25% 30%, rgba(255,255,255,.14) 0 1.1px, transparent 1.6px),
+    radial-gradient(circle at 70% 55%, rgba(255,220,180,.13) 0 1.1px, transparent 1.6px),
+    radial-gradient(circle at 45% 80%, rgba(180,210,255,.13) 0 1.1px, transparent 1.6px),
+    /* rangées de gradins (dégradé par paliers) */
+    repeating-linear-gradient(to bottom,
+      #2b3242 0 6px, #232a38 6px 12px),
+    linear-gradient(180deg, #1a2030, #10151f);
+  background-size: 9px 9px, 11px 11px, 13px 13px, 100% 100%, 100% 100%;
+  box-shadow: inset 0 0 60px rgba(0,0,0,.6);
+  border-radius: 4px;
+}
+.stand::after { /* ombre vers le terrain (bord intérieur) */
+  content:""; position:absolute; inset:0; pointer-events:none;
+  box-shadow: inset 0 0 40px rgba(0,0,0,.55);
+}
+
+/* positions des tribunes autour du rectangle terrain (16/9) */
+.stand-top    { left: -14%; right: -14%; bottom: 100%; height: 34%; }
+.stand-bottom { left: -14%; right: -14%; top: 100%;    height: 40%; }
+.stand-left   { top: -34%;  bottom: -40%; right: 100%; width: 16%; }
+.stand-right  { top: -34%;  bottom: -40%; left: 100%;  width: 16%; }
+
+/* teinte "home/visitors" sur les tribunes latérales */
+.stand-left  { box-shadow: inset 0 0 60px rgba(0,0,0,.6), inset 8px 0 40px rgba(47,109,246,.18); }
+.stand-right { box-shadow: inset 0 0 60px rgba(0,0,0,.6), inset -8px 0 40px rgba(224,57,59,.18); }
+
+/* halo de projecteurs (coins hauts) */
+.floodlight {
+  position: absolute; z-index: 0; width: 46%; height: 60%; top: -40%;
+  pointer-events: none; filter: blur(6px); opacity: .5;
+}
+.fl-tl { left: -10%; background: radial-gradient(circle at 20% 20%, rgba(255,255,230,.5), transparent 60%); }
+.fl-tr { right: -10%; background: radial-gradient(circle at 80% 20%, rgba(255,255,230,.5), transparent 60%); }
+
+.field {
+  position: relative; z-index: 2;
+  transform: translateZ(1px);          /* le terrain passe devant les gradins */
+  transform-style: preserve-3d;
+}
+.stand { transform: translateZ(-2px); }  /* gradins légèrement en retrait */
 .field-turf {
   position: relative;
   aspect-ratio: 16 / 9;
