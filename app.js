@@ -19,6 +19,8 @@
   const gameSelect  = document.getElementById("gameSelect");
   const bannerHome  = document.getElementById("bannerHome");   // GAUCHE = domicile
   const bannerAway  = document.getElementById("bannerAway");   // DROITE = extérieur
+  const rosterHome  = document.getElementById("rosterHome");
+  const rosterAway  = document.getElementById("rosterAway");
 
   /* ---------- Helpers ---------- */
   function rateClass(v) {
@@ -76,6 +78,22 @@
       <span class="tb-tag">EXTÉRIEUR</span>
       <span class="tb-abbr">${TEAMS.away.abbr}</span>
       <span class="tb-name">${TEAMS.away.name}</span>`;
+
+    renderRoster(rosterHome, TEAMS.home);
+    renderRoster(rosterAway, TEAMS.away);
+  }
+
+  // Mini-liste des 3 titulaires (WR/TE/RB) d'une équipe, dans le HUD de coin.
+  function renderRoster(el, team) {
+    if (!el) return;
+    el.style.setProperty("--tc", team.color || "#888");
+    const rows = team.players.map(p => `
+      <div class="rb-row">
+        <span class="rb-pos">${p.abbr}</span>
+        <span class="rb-nm">${p.player.name}</span>
+        <span class="rb-ovr">${p.overall}</span>
+      </div>`).join("");
+    el.innerHTML = `<span class="hud-label">${team.abbr} · TITULAIRES</span>${rows}`;
   }
 
   // Remplit le menu des matchs pour une semaine donnée

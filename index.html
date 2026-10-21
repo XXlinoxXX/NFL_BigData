@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Teko:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=3" />
 </head>
 <body>
 
@@ -41,11 +41,11 @@
     <!-- Panneaux d'info coin gauche / droite (style playbook) -->
     <aside class="hud hud-left">
       <div class="hud-box"><span class="hud-label">OFFENSE</span><span class="hud-val">I-Formation</span></div>
-      <div class="hud-box"><span class="hud-label">DEFENSE</span><span class="hud-val">4-3 Cover 2</span></div>
+      <div class="hud-box roster-box" id="rosterHome"></div>
     </aside>
     <aside class="hud hud-right">
-      <div class="hud-box"><span class="hud-label">PLAY</span><span class="hud-val">3rd &amp; Goal</span></div>
-      <div class="hud-box"><span class="hud-label">CALL</span><span class="hud-val">HB Dive</span></div>
+      <div class="hud-box"><span class="hud-label">DEFENSE</span><span class="hud-val">4-3 Cover 2</span></div>
+      <div class="hud-box roster-box" id="rosterAway"></div>
     </aside>
 
     <!-- Le terrain, vue du dessus -->
@@ -81,8 +81,8 @@
     <p>Outil d'aide à l'évaluation — données illustratives, barème 0–99 (style <em>Ultimate Team</em>).</p>
   </footer>
 
-  <script src="games.js"></script>
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script src="games.js?v=3"></script>
+  <script src="data.js?v=3"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

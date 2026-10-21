@@ -80,6 +80,19 @@ body {
 .hud-label { display: block; font-size: 11px; letter-spacing: 1.5px; color: var(--muted); }
 .hud-val { font-family: "Teko"; font-size: 22px; font-weight: 600; line-height: 1; }
 .hud-right .hud-box { text-align: right; }
+
+/* Mini-liste des titulaires WR/TE/RB dans le HUD */
+.roster-box { border-left: 3px solid var(--tc, var(--gold)); }
+.roster-box .hud-label { margin-bottom: 6px; }
+.rb-row {
+  display: grid; grid-template-columns: 30px 1fr auto; gap: 8px; align-items: baseline;
+  padding: 3px 0; border-top: 1px solid var(--line);
+}
+.rb-row:first-of-type { border-top: none; }
+.rb-pos { font-family: "Teko"; font-weight: 700; font-size: 15px; color: var(--tc, var(--gold)); }
+.rb-nm  { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.rb-ovr { font-family: "Teko"; font-weight: 700; font-size: 16px; color: var(--gold); }
+.hud-right .rb-row { grid-template-columns: auto 1fr 30px; text-align: left; }
 @media (max-width: 780px){ .hud { position: static; flex-direction: row; justify-content: center; margin-bottom: 14px; } .hud-right { align-items: stretch; } }
 
 /* Terrain — vue du dessus (à plat) */
