@@ -14,8 +14,14 @@ tactique et technique des joueurs.
 
 ## Fonctionnalités
 
-- **Sélection interactive** : trois cartes façon FIFA. Un clic → l'affichage
-  « zoome » sur la fiche détaillée du poste (transition animée).
+- **Sélecteur de match** : deux menus (semaine → match) alimentés par la saison
+  NFL 2021 (`games.csv`). On peut choisir n'importe quel match ; l'équipe
+  **à domicile s'affiche à gauche**, l'équipe **extérieure à droite**, avec les
+  bons sigles, noms et couleurs d'équipe.
+- **Terrain vu du dessus** : les 11 joueurs de chaque équipe sont placés ;
+  seuls les 3 postes **WR · TE · RB** sont interactifs.
+- **Sélection interactive** : un clic sur un joueur → l'affichage « zoome » sur
+  sa fiche détaillée (style carte FIFA, transition animée).
 - **Attributs notés 0–99** regroupés par famille : **Technique**, **Physique**,
   **Mental / Jeu** (barres animées, codes couleur selon le niveau).
 - **Stats tactiques** repères par poste (séparation, yards après contact,
@@ -27,6 +33,24 @@ tactique et technique des joueurs.
 
 > Les valeurs sont **illustratives** : elles donnent une grille de lecture.
 > Remplacez-les dans `data.js` par vos propres relevés pour un joueur réel.
+
+## Données des matchs
+
+- `games.csv` — source : calendrier NFL 2021 (gameId, semaine, date, équipes).
+- `games.js` — **généré depuis le CSV** (tableau `GAMES`), chargé par la page.
+  Pour régénérer après modification du CSV :
+  ```bash
+  python3 - <<'PY'
+  import csv, json
+  rows=[{"gameId":r["gameId"],"season":int(r["season"]),"week":int(r["week"]),
+         "date":r["gameDate"],"time":r["gameTimeEastern"],
+         "home":r["homeTeamAbbr"],"away":r["visitorTeamAbbr"]}
+        for r in csv.DictReader(open("games.csv"))]
+  open("games.js","w").write("const GAMES = "+json.dumps(rows,ensure_ascii=False)+";\n")
+  PY
+  ```
+  > Le CSV est chargé via un fichier `.js` (et non `fetch`) pour que la page
+  > fonctionne aussi en ouvrant simplement `index.html` en local (`file://`).
 
 ## Lancer en local
 

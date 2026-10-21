@@ -47,9 +47,18 @@ body {
   content: ""; position: absolute; left: 0; right: 0; bottom: -13px; height: 3px;
   background: var(--gold); border-radius: 3px;
 }
-.matchup { font-family: "Teko"; font-size: 20px; letter-spacing: 1px; color: var(--muted); }
-.matchup b:first-of-type { color: var(--home); }
-.matchup b:last-of-type { color: var(--away); }
+/* ---- Sélecteur de match ---- */
+.game-picker { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+.gp-field { display: flex; flex-direction: column; gap: 3px; }
+.gp-field > span { font-size: 10.5px; letter-spacing: 1.5px; color: var(--muted); font-weight: 700; }
+.gp-field select {
+  font: inherit; font-weight: 600; color: var(--text);
+  background: linear-gradient(180deg, #1b2335, #121825);
+  border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px;
+  cursor: pointer; max-width: 320px; box-shadow: var(--shadow);
+}
+.gp-field select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.gp-field select option { background: #141a28; color: var(--text); }
 
 /* ============================ VUE TERRAIN ============================ */
 .field-view {
@@ -118,18 +127,37 @@ body {
 .yardlines .hash-row.h1 { top: 38%; }
 .yardlines .hash-row.h2 { top: 62%; }
 
-/* end zones */
+/* end zones (teintées par la couleur de l'équipe via les bandeaux) */
 .endzone { position: absolute; top: 0; bottom: 0; width: 8.5%; }
 .endzone-left { left: 0; background: linear-gradient(90deg, #15532a, #1c6835); box-shadow: inset -3px 0 0 #fff; }
-.endzone-right { right: 0; background: linear-gradient(270deg, #7a1c22, #9e2a30); box-shadow: inset 3px 0 0 #fff; }
+.endzone-right { right: 0; background: linear-gradient(270deg, #15532a, #1c6835); box-shadow: inset 3px 0 0 #fff; }
 
 /* logo central */
 .midlogo {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
   font-size: clamp(30px, 6vw, 70px); opacity: .5; filter: drop-shadow(0 4px 10px rgba(0,0,0,.5));
+  z-index: 1;
 }
 
-/* libellés latéraux */
+/* ---- Bandeaux d'équipe sur les end zones (GAUCHE=dom., DROITE=ext.) ---- */
+.team-banner {
+  position: absolute; top: 0; bottom: 0; width: 8.5%; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  background-color: var(--tc, #1c6835);   /* repli si color-mix non supporté */
+  background-image: linear-gradient(180deg, rgba(255,255,255,.12), rgba(0,0,0,.45));
+  color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6); overflow: hidden;
+}
+.banner-left  { left: 0;  box-shadow: inset -4px 0 0 rgba(255,255,255,.85); }
+.banner-right { right: 0; box-shadow: inset  4px 0 0 rgba(255,255,255,.85); }
+.tb-tag  { font-size: clamp(8px, 1vw, 11px); letter-spacing: 1.5px; font-weight: 700; opacity: .9;
+  writing-mode: vertical-rl; transform: rotate(180deg); }
+.banner-right .tb-tag { transform: none; writing-mode: vertical-rl; }
+.tb-abbr { font-family: "Teko"; font-weight: 700; font-size: clamp(22px, 4vw, 46px); line-height: .9; }
+.tb-name { font-size: clamp(9px, 1.1vw, 13px); font-weight: 600; text-align: center;
+  writing-mode: vertical-rl; max-height: 55%; opacity: .92; }
+.banner-left .tb-name { transform: rotate(180deg); }
+
+
 /* ============================ PASTILLES JOUEURS ============================ */
 .players-home, .players-away { position: absolute; inset: 0; }
 
@@ -155,8 +183,8 @@ body {
   box-shadow: 0 10px 22px rgba(0,0,0,.55), inset 0 0 0 3px rgba(255,255,255,.12);
   font-size: clamp(20px, 3.5vw, 34px);
 }
-.puck.home .puck-disc { box-shadow: 0 10px 22px rgba(0,0,0,.55), inset 0 0 0 3px var(--home), 0 0 0 2px rgba(47,109,246,.35); }
-.puck.away .puck-disc { box-shadow: 0 10px 22px rgba(0,0,0,.55), inset 0 0 0 3px var(--away), 0 0 0 2px rgba(224,57,59,.35); }
+.puck.home .puck-disc { box-shadow: 0 10px 22px rgba(0,0,0,.55), inset 0 0 0 3px var(--tc, var(--home)), 0 0 0 2px rgba(255,255,255,.15); }
+.puck.away .puck-disc { box-shadow: 0 10px 22px rgba(0,0,0,.55), inset 0 0 0 3px var(--tc, var(--away)), 0 0 0 2px rgba(255,255,255,.15); }
 .puck-num {
   position: absolute; top: -6px; right: -6px; font-family: "Teko"; font-weight: 700;
   font-size: 13px; background: #0c111b; color: #fff; border-radius: 999px;
@@ -173,8 +201,8 @@ body {
   border: 1px solid var(--line); border-radius: 10px; padding: 5px 10px; text-align: center;
   box-shadow: var(--shadow); min-width: 96px;
 }
-.puck.home .puck-tag { border-top: 3px solid var(--home); }
-.puck.away .puck-tag { border-top: 3px solid var(--away); }
+.puck.home .puck-tag { border-top: 3px solid var(--tc, var(--home)); }
+.puck.away .puck-tag { border-top: 3px solid var(--tc, var(--away)); }
 .puck-tag .nm { font-family: "Teko"; font-size: 17px; font-weight: 600; line-height: 1; }
 .puck-tag .p1 { font-size: 11px; letter-spacing: 1px; color: var(--gold); font-weight: 700; }
 .puck-tag .p2 { font-size: 11px; color: var(--muted); }
@@ -186,8 +214,8 @@ body {
   background: radial-gradient(circle at 35% 30%, #39414f, #171c28);
   font-size: 0;
 }
-.puck.filler.home .puck-disc { box-shadow: 0 6px 14px rgba(0,0,0,.5), inset 0 0 0 2px rgba(47,109,246,.65); }
-.puck.filler.away .puck-disc { box-shadow: 0 6px 14px rgba(0,0,0,.5), inset 0 0 0 2px rgba(224,57,59,.65); }
+.puck.filler.home .puck-disc { box-shadow: 0 6px 14px rgba(0,0,0,.5), inset 0 0 0 2px var(--tc, var(--home)); }
+.puck.filler.away .puck-disc { box-shadow: 0 6px 14px rgba(0,0,0,.5), inset 0 0 0 2px var(--tc, var(--away)); }
 .filler-pos { font-family: "Teko"; font-weight: 700; font-size: clamp(11px, 1.7vw, 16px); color: #cfd8e6; }
 .puck.filler .puck-num { font-size: 11px; top: -5px; right: -5px; padding: 0 5px; }
 .puck.filler:hover .puck-stand { transform: none; }  /* pas d'effet survol */

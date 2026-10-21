@@ -21,7 +21,17 @@
       <span class="nav-item">⚙️ SETTINGS</span>
     </nav>
     <div class="topnav-right">
-      <span class="matchup"><b>HOME</b> vs <b>VISITORS</b></span>
+      <!-- Sélecteur de match (rempli depuis games.csv via games.js) -->
+      <div class="game-picker">
+        <label class="gp-field">
+          <span>SEMAINE</span>
+          <select id="weekSelect" aria-label="Choisir la semaine"></select>
+        </label>
+        <label class="gp-field">
+          <span>MATCH</span>
+          <select id="gameSelect" aria-label="Choisir le match"></select>
+        </label>
+      </div>
     </div>
   </header>
 
@@ -48,12 +58,16 @@
           <div class="endzone endzone-right"></div>
           <div class="midlogo">🏈</div>
 
+          <!-- bandeaux d'équipe : HOME à gauche, VISITOR à droite -->
+          <div class="team-banner banner-left"  id="bannerHome"></div>
+          <div class="team-banner banner-right" id="bannerAway"></div>
+
           <!-- pastilles joueurs : injectées par JS -->
           <div class="players-home" id="playersHome"></div>
           <div class="players-away" id="playersAway"></div>
         </div>
       </div>
-      <p class="field-hint">Cliquez sur un joueur pour zoomer sur sa fiche d'analyse — <span>Home à gauche · Visitors à droite</span></p>
+      <p class="field-hint" id="fieldHint">Choisissez un match, puis cliquez sur un joueur (WR · TE · RB) pour zoomer — <span>Domicile à gauche · Extérieur à droite</span></p>
     </div>
   </main>
 
@@ -67,6 +81,7 @@
     <p>Outil d'aide à l'évaluation — données illustratives, barème 0–99 (style <em>Ultimate Team</em>).</p>
   </footer>
 
+  <script src="games.js"></script>
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>

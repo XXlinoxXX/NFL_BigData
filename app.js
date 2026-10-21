@@ -15,6 +15,10 @@
   const detail      = document.getElementById("detail");
   const detailInner = document.getElementById("detailInner");
   const backBtn     = document.getElementById("backBtn");
+  const weekSelect  = document.getElementById("weekSelect");
+  const gameSelect  = document.getElementById("gameSelect");
+  const bannerHome  = document.getElementById("bannerHome");   // GAUCHE = domicile
+  const bannerAway  = document.getElementById("bannerAway");   // DROITE = extérieur
 
   /* ---------- Helpers ---------- */
   function rateClass(v) {
@@ -22,6 +26,74 @@
     if (v >= 82) return "rate-good";
     if (v >= 75) return "rate-avg";
     return "rate-low";
+  }
+
+  /* ========================================================================
+     SÉLECTEUR DE MATCH (depuis games.csv -> GAMES)
+     Domicile (home) à GAUCHE, Extérieur (visitor) à DROITE.
+     ======================================================================== */
+
+  // Applique un match : met à jour les sigles/noms/couleurs des 2 équipes
+  function applyMatch(game) {
+    if (!game) return;
+
+    // GAUCHE = équipe à domicile
+    TEAMS.home.abbr  = game.home;
+    TEAMS.home.name  = teamName(game.home);
+    TEAMS.home.color = teamColor(game.home);
+    // DROITE = équipe extérieure
+    TEAMS.away.abbr  = game.away;
+    TEAMS.away.name  = teamName(game.away);
+    TEAMS.away.color = teamColor(game.away);
+
+    renderBanners(game);
+    recolorPucks();
+  }
+
+  // Bandeaux d'équipe sur les bords du terrain
+  function renderBanners(game) {
+    bannerHome.style.setProperty("--tc", TEAMS.home.color);
+    bannerAway.style.setProperty("--tc", TEAMS.away.color);
+    bannerHome.innerHTML = `
+      <span class="tb-tag">DOMICILE</span>
+      <span class="tb-abbr">${TEAMS.home.abbr}</span>
+      <span class="tb-name">${TEAMS.home.name}</span>`;
+    bannerAway.innerHTML = `
+      <span class="tb-tag">EXTÉRIEUR</span>
+      <span class="tb-abbr">${TEAMS.away.abbr}</span>
+      <span class="tb-name">${TEAMS.away.name}</span>`;
+  }
+
+  // Recolore les liserés des pastilles selon la couleur d'équipe courante
+  function recolorPucks() {
+    playersHome.querySelectorAll(".puck").forEach(p => p.style.setProperty("--tc", TEAMS.home.color));
+    playersAway.querySelectorAll(".puck").forEach(p => p.style.setProperty("--tc", TEAMS.away.color));
+  }
+
+  // Remplit le menu des matchs pour une semaine donnée
+  function fillGameSelect(week) {
+    const games = GAMES.filter(g => g.week === week);
+    gameSelect.innerHTML = games.map((g, i) =>
+      `<option value="${g.gameId}">${g.home} (dom.) vs ${g.away} (ext.) — ${g.date}</option>`
+    ).join("");
+    // applique le 1er match de la semaine
+    const first = games[0];
+    if (first) applyMatch(first);
+  }
+
+  // Construit le sélecteur semaine + branche les événements
+  function buildGamePicker() {
+    const weeks = [...new Set(GAMES.map(g => g.week))].sort((a, b) => a - b);
+    weekSelect.innerHTML = weeks.map(w => `<option value="${w}">Semaine ${w}</option>`).join("");
+
+    weekSelect.addEventListener("change", () => fillGameSelect(Number(weekSelect.value)));
+    gameSelect.addEventListener("change", () => {
+      const g = GAMES.find(x => x.gameId === gameSelect.value);
+      applyMatch(g);
+    });
+
+    // état initial : 1re semaine, 1er match
+    fillGameSelect(weeks[0]);
   }
 
   /* ---------- Lignes de yards ---------- */
@@ -181,10 +253,14 @@
       </div>`).join("");
 
     const teamClass = team.id === "home" ? "home" : "away";
+    const side = team.id === "home" ? "DOMICILE" : "EXTÉRIEUR";
+    const abbr = team.abbr || (team.id === "home" ? "HOME" : "AWAY");
 
     return `
       <div class="detail-head">
-        <span class="team-badge ${teamClass}">${team.name}</span>
+        <span class="team-badge ${teamClass}" style="box-shadow: inset 0 0 0 2px ${team.color || '#888'}">
+          ${abbr} · ${side}
+        </span>
         <div class="dh-ovr"><div class="num">${pos.overall}</div><div class="pos">${pos.abbr}</div></div>
         <div class="dh-text">
           <div class="who">#${pos.player.number} ${pos.player.name}</div>
@@ -228,4 +304,5 @@
   buildFillers(TEAMS.away, playersAway);
   buildTeam(TEAMS.home, playersHome, LAYOUT.home);  // puis les 3 postes cliquables (au-dessus)
   buildTeam(TEAMS.away, playersAway, LAYOUT.away);
+  buildGamePicker();                        // sélecteur de match + applique le 1er match
 })();
