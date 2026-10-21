@@ -200,18 +200,16 @@
 
       btn.innerHTML = `
         <div class="puck-stand">
-          <div class="fcard ${cardTier(pl.overall)}">
-            <div class="fc-shine"></div>
-            <div class="fc-top">
-              <span class="fc-ovr">${pl.overall}</span>
-              <span class="fc-pos">${pl.abbr}</span>
-            </div>
-            <div class="fc-portrait">
-              <span class="fc-emoji">${pl.emoji}</span>
-              <span class="fc-num">#${pl.player.number}</span>
-            </div>
-            <div class="fc-name">${pl.player.name}</div>
-            <div class="fc-stat">${pl.player.line2}</div>
+          <div class="fdisc ${cardTier(pl.overall)}">
+            <div class="fd-shine"></div>
+            <span class="fd-ovr">${pl.overall}</span>
+            <span class="fd-emoji">${pl.emoji}</span>
+            <span class="fd-pos">${pl.abbr}</span>
+            <span class="fd-num">#${pl.player.number}</span>
+          </div>
+          <div class="fd-tag">
+            <div class="fd-name">${pl.player.name}</div>
+            <div class="fd-stat">${pl.player.line2}</div>
           </div>
         </div>`;
 

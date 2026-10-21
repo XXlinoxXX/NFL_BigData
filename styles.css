@@ -189,68 +189,74 @@ body {
 }
 .puck:hover .puck-stand { transform: translateY(-6px) scale(1.07); }
 
-/* ---------------- CARTE FIFA (joueurs interactifs WR/TE/RB) ---------------- */
-.fcard {
-  position: relative; width: clamp(78px, 11vw, 112px);
-  padding: 9px 8px 10px; border-radius: 12px 12px 14px 14px;
-  text-align: center; overflow: hidden; isolation: isolate;
+/* ------------- PASTILLE RONDE "FIFA" (joueurs interactifs WR/TE/RB) ------------- */
+.fdisc {
+  position: relative; isolation: isolate; overflow: hidden;
+  width: clamp(40px, 6vw, 62px); height: clamp(40px, 6vw, 62px); border-radius: 50%;
+  display: grid; place-items: center;
   color: #2a1e05;
-  box-shadow: 0 12px 26px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.35);
-  border-bottom: 3px solid var(--tc, #888);
+  box-shadow: 0 9px 20px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.35);
 }
-/* liseré de la couleur d'équipe tout autour */
-.fcard::after {
-  content:""; position:absolute; inset:0; border-radius: inherit; z-index:3;
-  box-shadow: inset 0 0 0 2px var(--tc, rgba(255,255,255,.4)); pointer-events:none;
+/* liseré de la couleur d'équipe autour du rond */
+.fdisc::after {
+  content:""; position:absolute; inset:0; border-radius:50%; z-index:3;
+  box-shadow: 0 0 0 2px var(--tc, rgba(255,255,255,.4)); pointer-events:none;
 }
 /* reflet brillant animé au survol */
-.fc-shine {
-  position:absolute; inset:0; z-index:2; pointer-events:none; border-radius:inherit;
-  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.45) 48%, transparent 66%);
-  transform: translateX(-120%); transition: transform .6s ease;
+.fd-shine {
+  position:absolute; inset:0; z-index:2; pointer-events:none; border-radius:50%;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.5) 48%, transparent 66%);
+  transform: translateX(-130%); transition: transform .6s ease;
 }
-.puck:hover .fc-shine { transform: translateX(120%); }
+.puck:hover .fd-shine { transform: translateX(130%); }
 
 /* Paliers de couleur (style FIFA : bronze/argent/or/élite) */
-.fcard.tier-bronze { background: linear-gradient(160deg, #e7a977, #8a4b25 70%); color:#2a1405; }
-.fcard.tier-silver { background: linear-gradient(160deg, #eef2f6, #9aa6b2 70%); color:#20262e; }
-.fcard.tier-gold   { background: linear-gradient(160deg, #ffe9a8, #d1a23b 72%); color:#3a2a05; }
-.fcard.tier-elite  {
-  background:
-    linear-gradient(160deg, #fff6d6 0%, #f3d471 40%, #ba8a2a 75%, #6d4f12 100%);
+.fdisc.tier-bronze { background: radial-gradient(circle at 35% 28%, #e7a977, #8a4b25 75%); color:#2a1405; }
+.fdisc.tier-silver { background: radial-gradient(circle at 35% 28%, #eef2f6, #9aa6b2 75%); color:#20262e; }
+.fdisc.tier-gold   { background: radial-gradient(circle at 35% 28%, #ffe9a8, #d1a23b 78%); color:#3a2a05; }
+.fdisc.tier-elite  {
+  background: radial-gradient(circle at 35% 28%, #fff6d6 0%, #f3d471 42%, #ba8a2a 78%, #6d4f12 100%);
   color:#2a1d02;
-  box-shadow: 0 12px 30px rgba(0,0,0,.6), 0 0 18px rgba(245,215,110,.5), inset 0 0 0 2px rgba(255,255,255,.5);
+  box-shadow: 0 9px 22px rgba(0,0,0,.6), 0 0 16px rgba(245,215,110,.5), inset 0 0 0 2px rgba(255,255,255,.5);
 }
 
-.fc-top {
-  position: relative; z-index: 4;
-  display: flex; flex-direction: column; align-items: flex-start; line-height: .82;
-  padding-left: 3px;
+.fd-emoji {
+  position: relative; z-index: 4; line-height: 1;
+  font-size: clamp(18px, 2.8vw, 28px); filter: drop-shadow(0 3px 5px rgba(0,0,0,.35));
 }
-.fc-ovr { font-family: "Teko"; font-weight: 700; font-size: clamp(22px, 3.3vw, 32px); }
-.fc-pos { font-family: "Teko"; font-weight: 700; font-size: clamp(11px, 1.6vw, 14px); letter-spacing: .5px; opacity: .85; }
+.fd-ovr {
+  position: absolute; top: -5px; left: -5px; z-index: 5;
+  font-family: "Teko"; font-weight: 700; font-size: clamp(11px, 1.6vw, 15px);
+  background: var(--gold); color: #1a1205; border-radius: 999px; padding: 0 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.4);
+}
+.fd-pos {
+  position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); z-index: 5;
+  font-family: "Teko"; font-weight: 700; font-size: 11px; letter-spacing: .5px;
+  background: #0c111b; color: #fff; border-radius: 999px; padding: 0 7px;
+  border: 1px solid rgba(255,255,255,.25);
+}
+.fd-num {
+  position: absolute; top: -5px; right: -5px; z-index: 5;
+  font-family: "Teko"; font-weight: 700; font-size: 11px;
+  background: rgba(12,17,27,.9); color: #fff; border-radius: 999px; padding: 0 6px;
+  border: 1px solid rgba(255,255,255,.25);
+}
 
-.fc-portrait {
-  position: relative; z-index: 4; margin: 1px 0 4px;
-  font-size: clamp(26px, 4.4vw, 42px); line-height: 1;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,.35));
+/* étiquette nom + stat sous le rond */
+.fd-tag {
+  margin-top: 8px; text-align: center; min-width: 84px;
+  background: linear-gradient(180deg, rgba(16,22,34,.96), rgba(10,14,22,.96));
+  border: 1px solid var(--line); border-top: 3px solid var(--tc, var(--gold));
+  border-radius: 9px; padding: 4px 9px; box-shadow: var(--shadow);
 }
-.fc-num {
-  position: absolute; top: 2px; right: 4px;
-  font-family: "Teko"; font-weight: 700; font-size: 12px;
-  background: rgba(0,0,0,.5); color: #fff; border-radius: 999px; padding: 0 6px;
-}
-
-.fc-name {
-  position: relative; z-index: 4;
-  font-family: "Teko"; font-weight: 700; font-size: clamp(13px, 1.9vw, 17px);
-  line-height: 1; text-transform: uppercase; letter-spacing: .3px;
+.fd-name {
+  font-family: "Teko"; font-weight: 700; font-size: clamp(13px, 1.7vw, 16px);
+  line-height: 1; letter-spacing: .3px; color: var(--text);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  border-top: 1px solid rgba(0,0,0,.25); padding-top: 4px;
 }
-.fc-stat {
-  position: relative; z-index: 4;
-  font-size: clamp(8.5px, 1.1vw, 10.5px); font-weight: 600; opacity: .82;
+.fd-stat {
+  font-size: clamp(8.5px, 1vw, 10.5px); font-weight: 600; color: var(--muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
