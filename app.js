@@ -33,21 +33,35 @@
      Domicile (home) à GAUCHE, Extérieur (visitor) à DROITE.
      ======================================================================== */
 
-  // Applique un match : met à jour les sigles/noms/couleurs des 2 équipes
+  // Applique un match : met à jour sigles/noms/couleurs ET régénère les
+  // joueurs (WR/TE/RB) de chaque équipe depuis son roster, puis reconstruit
+  // les cartes sur le terrain.
   function applyMatch(game) {
     if (!game) return;
 
     // GAUCHE = équipe à domicile
-    TEAMS.home.abbr  = game.home;
-    TEAMS.home.name  = teamName(game.home);
-    TEAMS.home.color = teamColor(game.home);
+    TEAMS.home.abbr    = game.home;
+    TEAMS.home.name    = teamName(game.home);
+    TEAMS.home.color   = teamColor(game.home);
+    TEAMS.home.players = buildPlayers(game.home);
     // DROITE = équipe extérieure
-    TEAMS.away.abbr  = game.away;
-    TEAMS.away.name  = teamName(game.away);
-    TEAMS.away.color = teamColor(game.away);
+    TEAMS.away.abbr    = game.away;
+    TEAMS.away.name    = teamName(game.away);
+    TEAMS.away.color   = teamColor(game.away);
+    TEAMS.away.players = buildPlayers(game.away);
 
     renderBanners(game);
-    recolorPucks();
+    rebuildTeams();
+  }
+
+  // Reconstruit entièrement les pastilles des 2 équipes (figurants + cartes)
+  function rebuildTeams() {
+    playersHome.innerHTML = "";
+    playersAway.innerHTML = "";
+    buildFillers(TEAMS.home, playersHome);
+    buildFillers(TEAMS.away, playersAway);
+    buildTeam(TEAMS.home, playersHome, LAYOUT.home);
+    buildTeam(TEAMS.away, playersAway, LAYOUT.away);
   }
 
   // Bandeaux d'équipe sur les bords du terrain
@@ -62,12 +76,6 @@
       <span class="tb-tag">EXTÉRIEUR</span>
       <span class="tb-abbr">${TEAMS.away.abbr}</span>
       <span class="tb-name">${TEAMS.away.name}</span>`;
-  }
-
-  // Recolore les liserés des pastilles selon la couleur d'équipe courante
-  function recolorPucks() {
-    playersHome.querySelectorAll(".puck").forEach(p => p.style.setProperty("--tc", TEAMS.home.color));
-    playersAway.querySelectorAll(".puck").forEach(p => p.style.setProperty("--tc", TEAMS.away.color));
   }
 
   // Remplit le menu des matchs pour une semaine donnée
@@ -152,7 +160,15 @@
     ]
   };
 
-  /* ---------- Construction des pastilles ---------- */
+  /* ---------- Palier de carte FIFA selon la note globale ---------- */
+  function cardTier(ov) {
+    if (ov >= 90) return "tier-elite";   // "icône" / or spécial
+    if (ov >= 84) return "tier-gold";    // or
+    if (ov >= 78) return "tier-silver";  // argent
+    return "tier-bronze";                // bronze
+  }
+
+  /* ---------- Construction des cartes FIFA cliquables ---------- */
   function buildTeam(team, container, layout) {
     team.players.forEach((pl, i) => {
       const pos = layout[i] || { x: 50, y: 50 };
@@ -160,20 +176,24 @@
       btn.className = "puck " + (team.id === "home" ? "home" : "away");
       btn.style.left = pos.x + "%";
       btn.style.top  = pos.y + "%";
+      btn.style.setProperty("--tc", team.color || "#888");
       btn.setAttribute("aria-label",
-        `${team.name} — ${pl.player.name}, ${pl.name}`);
+        `${team.name} — ${pl.player.name}, ${pl.name}, note ${pl.overall}`);
 
       btn.innerHTML = `
         <div class="puck-stand">
-          <div class="puck-disc">
-            ${pl.emoji}
-            <span class="puck-num">#${pl.player.number}</span>
-            <span class="puck-ovr">${pl.overall}</span>
-          </div>
-          <div class="puck-tag">
-            <div class="nm">${pl.player.name}</div>
-            <div class="p1">${pl.player.line1}</div>
-            <div class="p2">${pl.player.line2}</div>
+          <div class="fcard ${cardTier(pl.overall)}">
+            <div class="fc-shine"></div>
+            <div class="fc-top">
+              <span class="fc-ovr">${pl.overall}</span>
+              <span class="fc-pos">${pl.abbr}</span>
+            </div>
+            <div class="fc-portrait">
+              <span class="fc-emoji">${pl.emoji}</span>
+              <span class="fc-num">#${pl.player.number}</span>
+            </div>
+            <div class="fc-name">${pl.player.name}</div>
+            <div class="fc-stat">${pl.player.line2}</div>
           </div>
         </div>`;
 
@@ -300,9 +320,7 @@
 
   /* ---------- Init ---------- */
   buildYardlines();
-  buildFillers(TEAMS.home, playersHome);   // figurants d'abord (en dessous)
-  buildFillers(TEAMS.away, playersAway);
-  buildTeam(TEAMS.home, playersHome, LAYOUT.home);  // puis les 3 postes cliquables (au-dessus)
-  buildTeam(TEAMS.away, playersAway, LAYOUT.away);
-  buildGamePicker();                        // sélecteur de match + applique le 1er match
+  // buildGamePicker -> fillGameSelect -> applyMatch -> rebuildTeams
+  // se charge de construire figurants + cartes pour le match sélectionné.
+  buildGamePicker();
 })();

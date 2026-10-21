@@ -225,82 +225,10 @@ function makePlayer(posId, ov) {
   return ref;
 }
 
-const TEAMS = {
-  home: {
-    id: "home",
-    name: "HOME TEAM",
-    nameFr: "Équipe locale",
-    color: "#2f6df6",      // liseré bleu
-    players: [
-      makePlayer("wr", {
-        overall: 90,
-        player: { name: "J. Carter", number: "18", line1: "WR", line2: "1 180 YDS · 9 TD" },
-        delta: { "Vitesse": +3, "Route Running": +2, "Réception": +1 }
-      }),
-      makePlayer("te", {
-        overall: 86,
-        player: { name: "M. Hughes", number: "87", line1: "TE", line2: "640 YDS · 6 TD" },
-        delta: { "Réception": +3, "Blocage de course": +2 }
-      }),
-      makePlayer("rb", {
-        overall: 88,
-        player: { name: "D. Reyes", number: "22", line1: "RB", line2: "1 240 YDS · 11 TD" },
-        delta: { "Vision": +2, "Agilité": +3, "Accélération": +2 }
-      })
-    ],
-    // Les 8 autres joueurs de l'attaque (NON interactifs) — I-Formation.
-    // pos = étiquette affichée ; x/y = placement sur le terrain (%).
-    fillers: [
-      { pos: "LT", number: "76", x: 46, y: 26 },
-      { pos: "LG", number: "66", x: 46, y: 38 },
-      { pos: "C",  number: "55", x: 46, y: 50 },
-      { pos: "RG", number: "67", x: 46, y: 62 },
-      { pos: "RT", number: "73", x: 46, y: 80 },
-      { pos: "QB", number: "12", x: 37, y: 50 },
-      { pos: "FB", number: "44", x: 24, y: 38 },
-      { pos: "WR", number: "80", x: 12, y: 88 }
-    ]
-  },
-  away: {
-    id: "away",
-    name: "VISITORS",
-    nameFr: "Équipe extérieure",
-    color: "#e0393b",      // liseré rouge
-    players: [
-      makePlayer("wr", {
-        overall: 85,
-        player: { name: "H. Pintans", number: "11", line1: "WR", line2: "980 YDS · 7 TD" },
-        delta: { "Vitesse": -2, "Séparation": -2, "YAC": +1 }
-      }),
-      makePlayer("te", {
-        overall: 82,
-        player: { name: "A. Donald", number: "84", line1: "TE", line2: "510 YDS · 4 TD" },
-        delta: { "Réception": -3, "Blocage de course": +2, "Force": +2 }
-      }),
-      makePlayer("rb", {
-        overall: 84,
-        player: { name: "F. Moreau", number: "26", line1: "RB", line2: "1 010 YDS · 8 TD" },
-        delta: { "Puissance": +3, "Vitesse": -2, "Vision": -1 }
-      })
-    ],
-    // Les 8 autres joueurs de la défense (NON interactifs) — 4-3 Cover 2.
-    fillers: [
-      { pos: "DE", number: "91", x: 54, y: 26 },
-      { pos: "DT", number: "99", x: 54, y: 38 },
-      { pos: "DT", number: "93", x: 54, y: 62 },
-      { pos: "DE", number: "90", x: 54, y: 80 },
-      { pos: "LB", number: "54", x: 65, y: 30 },
-      { pos: "LB", number: "52", x: 66, y: 50 },
-      { pos: "LB", number: "58", x: 67, y: 66 },
-      { pos: "CB", number: "24", x: 88, y: 88 }
-    ]
-  }
-};
-
-
 /* =========================================================================
    Table des équipes NFL : abréviation -> nom complet + couleur.
-   Sert à l'affichage du sélecteur de match et des bandeaux d'équipe.
+   Sert à l'affichage du sélecteur de match, des bandeaux et des rosters.
+   (Défini AVANT TEAMS car buildPlayers/teamName/teamColor y sont utilisés.)
    ========================================================================= */
 const TEAM_INFO = {
   ARI: { name: "Arizona Cardinals",      color: "#97233F" },
@@ -338,3 +266,180 @@ const TEAM_INFO = {
 };
 function teamName(abbr) { return (TEAM_INFO[abbr] && TEAM_INFO[abbr].name) || abbr; }
 function teamColor(abbr) { return (TEAM_INFO[abbr] && TEAM_INFO[abbr].color) || "#555"; }
+
+/* -------------------------------------------------------------------------
+   Figurants (joueurs NON interactifs) — fixes, identiques pour toute équipe.
+   HOME = attaque en I-Formation / AWAY = défense 4-3 Cover 2.
+   ------------------------------------------------------------------------- */
+const FILLERS_OFFENSE = [
+  { pos: "LT", number: "76", x: 46, y: 26 },
+  { pos: "LG", number: "66", x: 46, y: 38 },
+  { pos: "C",  number: "55", x: 46, y: 50 },
+  { pos: "RG", number: "67", x: 46, y: 62 },
+  { pos: "RT", number: "73", x: 46, y: 80 },
+  { pos: "QB", number: "12", x: 37, y: 50 },
+  { pos: "FB", number: "44", x: 24, y: 38 },
+  { pos: "WR", number: "80", x: 12, y: 88 }
+];
+const FILLERS_DEFENSE = [
+  { pos: "DE", number: "91", x: 54, y: 26 },
+  { pos: "DT", number: "99", x: 54, y: 38 },
+  { pos: "DT", number: "93", x: 54, y: 62 },
+  { pos: "DE", number: "90", x: 54, y: 80 },
+  { pos: "LB", number: "54", x: 65, y: 30 },
+  { pos: "LB", number: "52", x: 66, y: 50 },
+  { pos: "LB", number: "58", x: 67, y: 66 },
+  { pos: "CB", number: "24", x: 88, y: 88 }
+];
+
+/* =========================================================================
+   ROSTERS — effectifs WR / TE / RB par franchise NFL (32 équipes).
+   Données ILLUSTRATIVES (aucun CSV d'effectifs réels n'est fourni) mais
+   DÉTERMINISTES : chaque équipe possède ses propres joueurs, numéros, notes
+   et ajustements d'attributs (delta). Structure par équipe :
+     { wr:{...}, te:{...}, rb:{...} }  où chaque poste =
+     { name, number, overall, line2, delta }
+   ========================================================================= */
+const ROSTERS = {
+  ARI: { wr:{name:"D. Hopkins",number:"10",overall:92,line2:"1 150 YDS · 8 TD",delta:{"Réception":+4,"Ajustements en l'air":+5,"Détente":+5}},
+         te:{name:"Z. Ertz",number:"86",overall:83,line2:"560 YDS · 5 TD",delta:{"Réception":+3,"Tracés":+2}},
+         rb:{name:"J. Conner",number:"6",overall:85,line2:"750 YDS · 15 TD",delta:{"Puissance":+4,"Protection du ballon":+2}} },
+  ATL: { wr:{name:"C. Ridley",number:"18",overall:86,line2:"920 YDS · 7 TD",delta:{"Route Running":+3,"Séparation":+2}},
+         te:{name:"K. Pitts",number:"8",overall:88,line2:"1 026 YDS · 1 TD",delta:{"Réception":+5,"Vitesse":+6,"Agilité":+5}},
+         rb:{name:"M. Davis",number:"28",overall:80,line2:"500 YDS · 3 TD",delta:{"Mains / Réception":+3}} },
+  BAL: { wr:{name:"M. Brown",number:"5",overall:85,line2:"1 008 YDS · 6 TD",delta:{"Vitesse":+4,"Accélération":+3}},
+         te:{name:"M. Andrews",number:"89",overall:91,line2:"1 361 YDS · 9 TD",delta:{"Réception":+6,"Tracés":+5,"Polyvalence":+4}},
+         rb:{name:"D. Williams",number:"47",overall:78,line2:"600 YDS · 2 TD",delta:{"Puissance":+2}} },
+  BUF: { wr:{name:"S. Diggs",number:"14",overall:93,line2:"1 225 YDS · 10 TD",delta:{"Route Running":+6,"Séparation":+5,"Réception":+3}},
+         te:{name:"D. Knox",number:"88",overall:81,line2:"587 YDS · 9 TD",delta:{"Blocage de course":+3,"Réception":+1}},
+         rb:{name:"D. Singletary",number:"26",overall:80,line2:"870 YDS · 7 TD",delta:{"Vision":+2,"Agilité":+2}} },
+  CAR: { wr:{name:"D. Moore",number:"2",overall:88,line2:"1 157 YDS · 4 TD",delta:{"YAC":+4,"Vitesse":+3,"Séparation":+2}},
+         te:{name:"I. Thomas",number:"80",overall:74,line2:"210 YDS · 1 TD",delta:{"Blocage de course":+2}},
+         rb:{name:"C. McCaffrey",number:"22",overall:94,line2:"442 YDS · 1 TD",delta:{"Agilité":+6,"Mains / Réception":+8,"Polyvalence (3 downs)":+8}} },
+  CHI: { wr:{name:"A. Robinson",number:"12",overall:84,line2:"410 YDS · 1 TD",delta:{"Réception":+3,"Ajustements en l'air":+3}},
+         te:{name:"C. Kmet",number:"85",overall:78,line2:"612 YDS · 0 TD",delta:{"Réception":+2}},
+         rb:{name:"D. Montgomery",number:"32",overall:83,line2:"849 YDS · 7 TD",delta:{"Puissance":+3,"Vision":+2}} },
+  CIN: { wr:{name:"J. Chase",number:"1",overall:90,line2:"1 455 YDS · 13 TD",delta:{"Vitesse":+5,"YAC":+6,"Ajustements en l'air":+4}},
+         te:{name:"C. Uzomah",number:"87",overall:76,line2:"493 YDS · 5 TD",delta:{"Blocage de passe":+2}},
+         rb:{name:"J. Mixon",number:"28",overall:87,line2:"1 205 YDS · 13 TD",delta:{"Vision":+3,"Puissance":+3,"Polyvalence (3 downs)":+2}} },
+  CLE: { wr:{name:"J. Landry",number:"80",overall:82,line2:"570 YDS · 2 TD",delta:{"Réception":+3,"YAC":+2}},
+         te:{name:"D. Njoku",number:"85",overall:80,line2:"475 YDS · 4 TD",delta:{"Vitesse":+3,"Agilité":+2}},
+         rb:{name:"N. Chubb",number:"24",overall:92,line2:"1 259 YDS · 8 TD",delta:{"Puissance":+6,"Jeu de jambes":+4,"Vision":+4}} },
+  DAL: { wr:{name:"C. Lamb",number:"88",overall:89,line2:"1 102 YDS · 6 TD",delta:{"Route Running":+4,"YAC":+5,"Agilité":+3}},
+         te:{name:"D. Schultz",number:"86",overall:82,line2:"808 YDS · 8 TD",delta:{"Réception":+4,"Tracés":+2}},
+         rb:{name:"E. Elliott",number:"21",overall:86,line2:"1 002 YDS · 10 TD",delta:{"Puissance":+4,"Protection de passe":+3}} },
+  DEN: { wr:{name:"C. Sutton",number:"14",overall:83,line2:"776 YDS · 2 TD",delta:{"Détente":+4,"Ajustements en l'air":+3}},
+         te:{name:"N. Fant",number:"87",overall:80,line2:"670 YDS · 4 TD",delta:{"Vitesse":+4,"Agilité":+3}},
+         rb:{name:"J. Williams",number:"33",overall:81,line2:"903 YDS · 4 TD",delta:{"Accélération":+3,"Vitesse":+2}} },
+  DET: { wr:{name:"A. St. Brown",number:"14",overall:84,line2:"912 YDS · 5 TD",delta:{"Route Running":+4,"Réception":+3,"YAC":+2}},
+         te:{name:"T. Hockenson",number:"88",overall:84,line2:"583 YDS · 4 TD",delta:{"Réception":+4,"Tracés":+3}},
+         rb:{name:"D. Swift",number:"32",overall:83,line2:"617 YDS · 5 TD",delta:{"Mains / Réception":+4,"Agilité":+3}} },
+  GB:  { wr:{name:"D. Adams",number:"17",overall:94,line2:"1 553 YDS · 11 TD",delta:{"Route Running":+7,"Séparation":+6,"Réception":+5}},
+         te:{name:"R. Tonyan",number:"85",overall:78,line2:"204 YDS · 2 TD",delta:{"Réception":+2}},
+         rb:{name:"A. Jones",number:"33",overall:88,line2:"799 YDS · 4 TD",delta:{"Agilité":+4,"Mains / Réception":+4,"Accélération":+3}} },
+  HOU: { wr:{name:"B. Cooks",number:"13",overall:84,line2:"1 037 YDS · 6 TD",delta:{"Vitesse":+5,"Accélération":+3}},
+         te:{name:"B. Jordan",number:"88",overall:72,line2:"118 YDS · 0 TD",delta:{"Blocage de course":+2}},
+         rb:{name:"D. Johnson",number:"31",overall:76,line2:"228 YDS · 0 TD",delta:{"Vision":+1}} },
+  IND: { wr:{name:"M. Pittman",number:"11",overall:84,line2:"1 082 YDS · 6 TD",delta:{"Réception":+3,"Détente":+3,"YAC":+2}},
+         te:{name:"J. Doyle",number:"84",overall:75,line2:"150 YDS · 1 TD",delta:{"Blocage de course":+3}},
+         rb:{name:"J. Taylor",number:"28",overall:93,line2:"1 811 YDS · 18 TD",delta:{"Vitesse":+7,"Accélération":+6,"Vision":+5}} },
+  JAX: { wr:{name:"M. Jones Jr.",number:"15",overall:80,line2:"832 YDS · 4 TD",delta:{"Vitesse":+4,"YAC":+2}},
+         te:{name:"D. Arnold",number:"88",overall:72,line2:"324 YDS · 0 TD",delta:{"Vitesse":+2}},
+         rb:{name:"J. Robinson",number:"25",overall:83,line2:"767 YDS · 8 TD",delta:{"Puissance":+3,"Vision":+2}} },
+  KC:  { wr:{name:"T. Hill",number:"10",overall:93,line2:"1 239 YDS · 9 TD",delta:{"Vitesse":+8,"Accélération":+6,"YAC":+5}},
+         te:{name:"T. Kelce",number:"87",overall:95,line2:"1 125 YDS · 9 TD",delta:{"Réception":+8,"Tracés":+8,"Polyvalence":+6}},
+         rb:{name:"C. Edwards-Helaire",number:"25",overall:80,line2:"517 YDS · 4 TD",delta:{"Mains / Réception":+3}} },
+  LA:  { wr:{name:"C. Kupp",number:"10",overall:95,line2:"1 947 YDS · 16 TD",delta:{"Route Running":+8,"Réception":+6,"YAC":+6}},
+         te:{name:"T. Higbee",number:"89",overall:79,line2:"560 YDS · 5 TD",delta:{"Réception":+2,"Blocage de course":+1}},
+         rb:{name:"D. Henderson",number:"27",overall:81,line2:"688 YDS · 5 TD",delta:{"Accélération":+3,"Agilité":+2}} },
+  LAC: { wr:{name:"K. Allen",number:"13",overall:90,line2:"1 138 YDS · 6 TD",delta:{"Route Running":+6,"Séparation":+5}},
+         te:{name:"J. Cook",number:"87",overall:76,line2:"180 YDS · 1 TD",delta:{"Blocage de course":+2}},
+         rb:{name:"A. Ekeler",number:"30",overall:88,line2:"911 YDS · 20 TD",delta:{"Mains / Réception":+6,"Agilité":+4,"Polyvalence (3 downs)":+6}} },
+  LV:  { wr:{name:"H. Renfrow",number:"13",overall:83,line2:"1 038 YDS · 9 TD",delta:{"Séparation":+5,"Route Running":+3}},
+         te:{name:"D. Waller",number:"83",overall:90,line2:"665 YDS · 2 TD",delta:{"Réception":+6,"Vitesse":+5,"Taille / Allonge":+3}},
+         rb:{name:"J. Jacobs",number:"28",overall:85,line2:"872 YDS · 9 TD",delta:{"Puissance":+4,"Vision":+2}} },
+  MIA: { wr:{name:"J. Waddle",number:"17",overall:85,line2:"1 015 YDS · 6 TD",delta:{"Vitesse":+6,"Accélération":+4,"YAC":+3}},
+         te:{name:"M. Gesicki",number:"88",overall:81,line2:"780 YDS · 2 TD",delta:{"Réception":+3,"Taille / Allonge":+4}},
+         rb:{name:"M. Gaskin",number:"37",overall:77,line2:"612 YDS · 3 TD",delta:{"Mains / Réception":+2}} },
+  MIN: { wr:{name:"J. Jefferson",number:"18",overall:93,line2:"1 616 YDS · 10 TD",delta:{"Route Running":+6,"YAC":+6,"Ajustements en l'air":+5}},
+         te:{name:"T. Conklin",number:"83",overall:76,line2:"593 YDS · 3 TD",delta:{"Réception":+2}},
+         rb:{name:"D. Cook",number:"4",overall:90,line2:"1 159 YDS · 6 TD",delta:{"Agilité":+5,"Accélération":+4,"Vision":+4}} },
+  NE:  { wr:{name:"J. Meyers",number:"16",overall:80,line2:"866 YDS · 2 TD",delta:{"Route Running":+3,"Séparation":+2}},
+         te:{name:"H. Henry",number:"85",overall:83,line2:"603 YDS · 9 TD",delta:{"Réception":+3,"Blocage de course":+2}},
+         rb:{name:"D. Harris",number:"37",overall:82,line2:"929 YDS · 15 TD",delta:{"Puissance":+4,"Protection du ballon":+2}} },
+  NO:  { wr:{name:"M. Thomas",number:"13",overall:88,line2:"blessé 2021",delta:{"Réception":+5,"Route Running":+4}},
+         te:{name:"A. Trautman",number:"82",overall:73,line2:"263 YDS · 1 TD",delta:{"Blocage de course":+2}},
+         rb:{name:"A. Kamara",number:"41",overall:91,line2:"898 YDS · 4 TD",delta:{"Agilité":+6,"Mains / Réception":+6,"Polyvalence (3 downs)":+5}} },
+  NYG: { wr:{name:"K. Golladay",number:"19",overall:82,line2:"521 YDS · 0 TD",delta:{"Détente":+4,"Ajustements en l'air":+4}},
+         te:{name:"E. Engram",number:"88",overall:78,line2:"408 YDS · 3 TD",delta:{"Vitesse":+3,"Agilité":+2}},
+         rb:{name:"S. Barkley",number:"26",overall:88,line2:"593 YDS · 2 TD",delta:{"Accélération":+5,"Agilité":+4,"Puissance":+3}} },
+  NYJ: { wr:{name:"C. Davis",number:"84",overall:80,line2:"492 YDS · 4 TD",delta:{"Détente":+3,"Réception":+2}},
+         te:{name:"R. Griffin",number:"84",overall:72,line2:"120 YDS · 1 TD",delta:{"Blocage de passe":+2}},
+         rb:{name:"M. Carter",number:"32",overall:79,line2:"639 YDS · 4 TD",delta:{"Agilité":+3,"Mains / Réception":+3}} },
+  PHI: { wr:{name:"D. Smith",number:"6",overall:84,line2:"916 YDS · 5 TD",delta:{"Route Running":+4,"Séparation":+3}},
+         te:{name:"D. Goedert",number:"88",overall:85,line2:"830 YDS · 4 TD",delta:{"Réception":+4,"Blocage de course":+3,"Agilité":+2}},
+         rb:{name:"M. Sanders",number:"26",overall:83,line2:"754 YDS · 0 TD",delta:{"Vitesse":+3,"Accélération":+3}} },
+  PIT: { wr:{name:"D. Johnson",number:"18",overall:85,line2:"1 161 YDS · 8 TD",delta:{"Réception":+4,"Détente":+4}},
+         te:{name:"P. Freiermuth",number:"88",overall:79,line2:"497 YDS · 7 TD",delta:{"Réception":+3}},
+         rb:{name:"N. Harris",number:"22",overall:85,line2:"1 200 YDS · 7 TD",delta:{"Mains / Réception":+5,"Puissance":+3,"Polyvalence (3 downs)":+4}} },
+  SEA: { wr:{name:"D.K. Metcalf",number:"14",overall:89,line2:"967 YDS · 12 TD",delta:{"Détente":+6,"Vitesse":+5,"Ajustements en l'air":+4}},
+         te:{name:"G. Everett",number:"81",overall:78,line2:"478 YDS · 4 TD",delta:{"Vitesse":+3,"Réception":+2}},
+         rb:{name:"R. Penny",number:"20",overall:80,line2:"749 YDS · 6 TD",delta:{"Vitesse":+4,"Puissance":+3}} },
+  SF:  { wr:{name:"D. Samuel",number:"19",overall:90,line2:"1 405 YDS · 6 TD",delta:{"YAC":+8,"Vitesse":+5,"Agilité":+4}},
+         te:{name:"G. Kittle",number:"85",overall:93,line2:"910 YDS · 6 TD",delta:{"Blocage de course":+6,"Réception":+5,"Force":+5}},
+         rb:{name:"E. Mitchell",number:"25",overall:80,line2:"963 YDS · 5 TD",delta:{"Vision":+3,"Accélération":+2}} },
+  TB:  { wr:{name:"M. Evans",number:"13",overall:90,line2:"1 035 YDS · 14 TD",delta:{"Détente":+6,"Ajustements en l'air":+5,"Réception":+4}},
+         te:{name:"R. Gronkowski",number:"87",overall:88,line2:"802 YDS · 6 TD",delta:{"Blocage de course":+5,"Réception":+4,"Force":+4}},
+         rb:{name:"L. Fournette",number:"7",overall:85,line2:"812 YDS · 8 TD",delta:{"Puissance":+4,"Mains / Réception":+3}} },
+  TEN: { wr:{name:"A.J. Brown",number:"11",overall:90,line2:"869 YDS · 5 TD",delta:{"YAC":+6,"Détente":+5,"Réception":+3}},
+         te:{name:"G. Firkser",number:"86",overall:74,line2:"291 YDS · 0 TD",delta:{"Réception":+2}},
+         rb:{name:"D. Henry",number:"22",overall:96,line2:"937 YDS · 10 TD",delta:{"Puissance":+9,"Vitesse":+5,"Protection du ballon":+4}} },
+  WAS: { wr:{name:"T. McLaurin",number:"17",overall:87,line2:"1 053 YDS · 5 TD",delta:{"Route Running":+5,"Séparation":+4,"Vitesse":+3}},
+         te:{name:"L. Thomas",number:"82",overall:77,line2:"428 YDS · 3 TD",delta:{"Blocage de course":+2,"Réception":+1}},
+         rb:{name:"A. Gibson",number:"24",overall:82,line2:"1 037 YDS · 7 TD",delta:{"Accélération":+3,"Puissance":+2}} }
+};
+
+// Roster générique de repli si une abréviation est inconnue
+const ROSTER_FALLBACK = {
+  wr:{name:"WR Titulaire",number:"80",overall:82,line2:"—",delta:{}},
+  te:{name:"TE Titulaire",number:"85",overall:80,line2:"—",delta:{}},
+  rb:{name:"RB Titulaire",number:"28",overall:82,line2:"—",delta:{}}
+};
+
+// Construit les 3 joueurs interactifs (WR/TE/RB) d'une équipe depuis son roster
+function buildPlayers(abbr) {
+  const r = ROSTERS[abbr] || ROSTER_FALLBACK;
+  return ["wr", "te", "rb"].map(id => {
+    const s = r[id] || ROSTER_FALLBACK[id];
+    return makePlayer(id, {
+      overall: s.overall,
+      player: { name: s.name, number: s.number, line1: id.toUpperCase(), line2: s.line2 },
+      delta: s.delta || {}
+    });
+  });
+}
+
+/* Les 2 équipes du match courant. abbr/name/color/players sont renseignés
+   dynamiquement par applyMatch() dans app.js. On initialise avec un match
+   par défaut pour que le terrain s'affiche même avant toute sélection.      */
+const TEAMS = {
+  home: {
+    id: "home",
+    abbr: "KC",
+    name: teamName("KC"),
+    nameFr: "Équipe locale",
+    color: teamColor("KC"),
+    players: buildPlayers("KC"),
+    fillers: FILLERS_OFFENSE
+  },
+  away: {
+    id: "away",
+    abbr: "BUF",
+    name: teamName("BUF"),
+    nameFr: "Équipe extérieure",
+    color: teamColor("BUF"),
+    players: buildPlayers("BUF"),
+    fillers: FILLERS_DEFENSE
+  }
+};
+

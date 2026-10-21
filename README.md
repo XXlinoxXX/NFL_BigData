@@ -18,10 +18,19 @@ tactique et technique des joueurs.
   NFL 2021 (`games.csv`). On peut choisir n'importe quel match ; l'équipe
   **à domicile s'affiche à gauche**, l'équipe **extérieure à droite**, avec les
   bons sigles, noms et couleurs d'équipe.
+- **Effectifs propres à chaque équipe** : les 3 postes **WR · TE · RB** sont
+  renseignés **par franchise** (`ROSTERS` dans `data.js`, les 32 équipes) avec
+  nom, numéro, note globale, mini-stat de saison et ajustements d'attributs.
+  Changer de match régénère automatiquement les joueurs des deux équipes.
 - **Terrain vu du dessus** : les 11 joueurs de chaque équipe sont placés ;
-  seuls les 3 postes **WR · TE · RB** sont interactifs.
-- **Sélection interactive** : un clic sur un joueur → l'affichage « zoome » sur
-  sa fiche détaillée (style carte FIFA, transition animée).
+  seuls les 3 postes **WR · TE · RB** sont interactifs (les 8 autres sont des
+  figurants).
+- **Cartes FIFA sur le terrain** : chaque joueur interactif est une mini-carte
+  façon *Ultimate Team* — fond **bronze / argent / or / élite** selon la note,
+  note globale + poste, nom, numéro et liseré aux couleurs de l'équipe (reflet
+  brillant au survol). Elles remplacent les anciennes pastilles à émoji.
+- **Sélection interactive** : un clic sur une carte → l'affichage « zoome » sur
+  la fiche détaillée du joueur (transition animée).
 - **Attributs notés 0–99** regroupés par famille : **Technique**, **Physique**,
   **Mental / Jeu** (barres animées, codes couleur selon le niveau).
 - **Stats tactiques** repères par poste (séparation, yards après contact,
@@ -31,8 +40,9 @@ tactique et technique des joueurs.
 - **Français** avec la terminologie **US** entre parenthèses (ex : *route running*,
   *yards after catch*).
 
-> Les valeurs sont **illustratives** : elles donnent une grille de lecture.
-> Remplacez-les dans `data.js` par vos propres relevés pour un joueur réel.
+> Les valeurs (notes, numéros, stats des `ROSTERS`) sont **illustratives** :
+> elles donnent une grille de lecture par équipe. Remplacez-les dans `data.js`
+> par vos propres relevés pour coller à vos joueurs réels.
 
 ## Données des matchs
 
