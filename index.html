@@ -3,41 +3,68 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NFL Scouting Board — WR · TE · RB</title>
-  <meta name="description" content="Fiches tactiques et techniques des postes Wide Receiver, Tight End et Running Back pour coachs — style carte FIFA." />
+  <title>NFL Playbook — HOME vs VISITORS · WR · TE · RB</title>
+  <meta name="description" content="Terrain NFL interactif : les 3 postes offensifs (WR, TE, RB) de l'équipe locale et de l'équipe extérieure, avec fiches tactiques style carte FIFA pour coachs." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Teko:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="field-bg" aria-hidden="true"></div>
 
+  <!-- ===================== BARRE SUPÉRIEURE ===================== -->
   <header class="topbar">
-    <div class="brand">
-      <span class="brand-mark">🏈</span>
-      <div>
-        <h1>NFL Scouting Board</h1>
-        <p class="subtitle">Analyse tactique des postes offensifs — <em>Coaches edition</em></p>
-      </div>
-    </div>
-    <div class="legend" id="legend">
-      <span class="legend-item"><b>OVR</b> Note globale <i>(Overall)</i></span>
-      <span class="legend-item"><b>PHY</b> Physique</span>
-      <span class="legend-item"><b>TEC</b> Technique</span>
+    <nav class="topnav">
+      <span class="nav-item active">🏈 PLAYBOOK</span>
+      <span class="nav-item">👥 ROSTER</span>
+      <span class="nav-item">📊 ANALYTICS</span>
+      <span class="nav-item">⚙️ SETTINGS</span>
+    </nav>
+    <div class="topnav-right">
+      <span class="matchup"><b>HOME</b> vs <b>VISITORS</b></span>
     </div>
   </header>
 
-  <!-- Vue sélection : les 3 postes -->
-  <main id="selection" class="selection" aria-label="Sélection du poste">
-    <p class="hint">Cliquez sur un poste pour zoomer sur sa fiche d'analyse.</p>
-    <div class="cards-grid" id="cardsGrid"><!-- cartes injectées par JS --></div>
+  <!-- ===================== VUE TERRAIN ===================== -->
+  <main id="fieldView" class="field-view" aria-label="Terrain — sélection des postes">
+
+    <!-- Panneaux d'info coin gauche / droite (style playbook) -->
+    <aside class="hud hud-left">
+      <div class="hud-box"><span class="hud-label">OFFENSE</span><span class="hud-val">I-Formation</span></div>
+      <div class="hud-box"><span class="hud-label">DEFENSE</span><span class="hud-val">4-3 Cover 2</span></div>
+    </aside>
+    <aside class="hud hud-right">
+      <div class="hud-box"><span class="hud-label">PLAY</span><span class="hud-val">3rd &amp; Goal</span></div>
+      <div class="hud-box"><span class="hud-label">CALL</span><span class="hud-val">HB Dive</span></div>
+    </aside>
+
+    <!-- Le terrain en perspective -->
+    <div class="field-wrap">
+      <div class="field">
+        <div class="field-turf">
+          <!-- lignes de yards + numéros générés en CSS/JS -->
+          <div class="yardlines" id="yardlines"></div>
+          <div class="endzone endzone-left"></div>
+          <div class="endzone endzone-right"></div>
+          <div class="midlogo">🏈</div>
+
+          <!-- libellés latéraux -->
+          <div class="sideword sideword-left">HOME TEAM</div>
+          <div class="sideword sideword-right">VISITORS</div>
+
+          <!-- pastilles joueurs : injectées par JS -->
+          <div class="players-home" id="playersHome"></div>
+          <div class="players-away" id="playersAway"></div>
+        </div>
+      </div>
+      <p class="field-hint">Cliquez sur un joueur pour zoomer sur sa fiche d'analyse — <span>Home à gauche · Visitors à droite</span></p>
+    </div>
   </main>
 
-  <!-- Vue détail : fiche zoomée d'un poste -->
+  <!-- ===================== VUE DÉTAIL (ZOOM) ===================== -->
   <section id="detail" class="detail" aria-hidden="true">
-    <button class="back-btn" id="backBtn" aria-label="Retour à la sélection">← Retour</button>
-    <div class="detail-inner" id="detailInner"><!-- injecté par JS --></div>
+    <button class="back-btn" id="backBtn" aria-label="Retour au terrain">← Retour au terrain</button>
+    <div class="detail-inner" id="detailInner"></div>
   </section>
 
   <footer class="footer">

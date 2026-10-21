@@ -189,3 +189,87 @@ const POSITIONS = [
     ]
   }
 ];
+
+/* =========================================================================
+   ÉQUIPES — vue "terrain" (playbook).
+   Chaque équipe aligne ses 3 postes (WR · TE · RB).
+   On part de la fiche de référence (POSITIONS) puis on applique un "delta"
+   d'attributs + les infos joueur (nom, numéro, mini-stat de terrain).
+   La structure finale de chaque joueur reste compatible avec la fiche détail.
+   ========================================================================= */
+
+// Récupère la fiche de référence d'un poste
+function basePos(id) {
+  return POSITIONS.find(p => p.id === id);
+}
+
+/* Fabrique un "joueur" : clone profond de la fiche poste + surcharges.
+   overrides = {
+     player: { name, number, line1, line2 },   // affichage sur le terrain
+     overall,                                   // note globale propre au joueur
+     delta: { "Nom d'attribut": +/-valeur }     // ajustements d'attributs
+   }                                                                        */
+function makePlayer(posId, ov) {
+  const ref = JSON.parse(JSON.stringify(basePos(posId)));
+  if (ov.overall != null) ref.overall = ov.overall;
+  if (ov.delta) {
+    ref.groups.forEach(g => g.attrs.forEach(a => {
+      if (ov.delta[a.key] != null) {
+        a.val = Math.max(40, Math.min(99, a.val + ov.delta[a.key]));
+      }
+    }));
+  }
+  if (ov.statLines) ref.statLines = ov.statLines;
+  ref.player = ov.player;   // { name, number, line1, line2 }
+  ref.posId = posId;
+  return ref;
+}
+
+const TEAMS = {
+  home: {
+    id: "home",
+    name: "HOME TEAM",
+    nameFr: "Équipe locale",
+    color: "#2f6df6",      // liseré bleu
+    players: [
+      makePlayer("wr", {
+        overall: 90,
+        player: { name: "J. Carter", number: "18", line1: "WR", line2: "1 180 YDS · 9 TD" },
+        delta: { "Vitesse": +3, "Route Running": +2, "Réception": +1 }
+      }),
+      makePlayer("te", {
+        overall: 86,
+        player: { name: "M. Hughes", number: "87", line1: "TE", line2: "640 YDS · 6 TD" },
+        delta: { "Réception": +3, "Blocage de course": +2 }
+      }),
+      makePlayer("rb", {
+        overall: 88,
+        player: { name: "D. Reyes", number: "22", line1: "RB", line2: "1 240 YDS · 11 TD" },
+        delta: { "Vision": +2, "Agilité": +3, "Accélération": +2 }
+      })
+    ]
+  },
+  away: {
+    id: "away",
+    name: "VISITORS",
+    nameFr: "Équipe extérieure",
+    color: "#e0393b",      // liseré rouge
+    players: [
+      makePlayer("wr", {
+        overall: 85,
+        player: { name: "H. Pintans", number: "11", line1: "WR", line2: "980 YDS · 7 TD" },
+        delta: { "Vitesse": -2, "Séparation": -2, "YAC": +1 }
+      }),
+      makePlayer("te", {
+        overall: 82,
+        player: { name: "A. Donald", number: "84", line1: "TE", line2: "510 YDS · 4 TD" },
+        delta: { "Réception": -3, "Blocage de course": +2, "Force": +2 }
+      }),
+      makePlayer("rb", {
+        overall: 84,
+        player: { name: "F. Moreau", number: "26", line1: "RB", line2: "1 010 YDS · 8 TD" },
+        delta: { "Puissance": +3, "Vitesse": -2, "Vision": -1 }
+      })
+    ]
+  }
+};
