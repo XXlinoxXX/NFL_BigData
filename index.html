@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Teko:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="stylesheet" href="styles.css?v=9" />
 </head>
 <body>
 
@@ -60,12 +60,35 @@
           <div class="team-banner banner-left"  id="bannerHome"></div>
           <div class="team-banner banner-right" id="bannerAway"></div>
 
+          <!-- couche SVG des tracés de playbook (dessinée par JS) -->
+          <svg class="routes-layer" id="routesLayer" viewBox="0 0 100 56.25" preserveAspectRatio="none" aria-hidden="true"></svg>
+
+          <!-- ballon animé pendant la simulation -->
+          <div class="ball" id="ball" aria-hidden="true">🏈</div>
+
           <!-- pastilles joueurs : injectées par JS -->
           <div class="players-home" id="playersHome"></div>
           <div class="players-away" id="playersAway"></div>
         </div>
       </div>
       <p class="field-hint" id="fieldHint">Choisissez un match, puis cliquez sur un joueur (WR · TE · RB) pour zoomer — <span>Domicile à gauche · Extérieur à droite</span></p>
+
+      <!-- ===================== PANNEAU PLAYBOOK ===================== -->
+      <section class="playbook-bar" aria-label="Plans de jeu">
+        <div class="pb-head">
+          <span class="pb-title">🏈 PLANS DE JEU</span>
+          <span class="pb-sub" id="pbSide">Côté <b>DOMICILE</b></span>
+          <div class="pb-side-toggle" role="group" aria-label="Choisir l'équipe à simuler">
+            <button class="pb-side active" id="pbSideHome" type="button">Domicile</button>
+            <button class="pb-side" id="pbSideAway" type="button">Extérieur</button>
+          </div>
+        </div>
+        <div class="pb-list" id="pbList" role="listbox" aria-label="Choisir un plan de jeu"></div>
+        <div class="pb-actions">
+          <p class="pb-desc" id="pbDesc">Sélectionnez un plan de jeu puis lancez la simulation.</p>
+          <button class="pb-sim" id="pbSim" type="button" disabled>▶ Simuler le jeu</button>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -79,8 +102,8 @@
     <p>Outil d'aide à l'évaluation — données illustratives, barème 0–99 (style <em>Ultimate Team</em>).</p>
   </footer>
 
-  <script src="games.js?v=8"></script>
-  <script src="data.js?v=8"></script>
-  <script src="app.js?v=8"></script>
+  <script src="games.js?v=9"></script>
+  <script src="data.js?v=9"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

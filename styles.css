@@ -383,3 +383,103 @@ body {
 /* ============================ FOOTER ============================ */
 .footer { position: relative; z-index:1; text-align:center; color: var(--muted); font-size: 13px; padding: 20px 16px 36px; }
 .footer em { color: var(--gold); font-style: normal; }
+
+/* ============================ PLAYBOOK : TRACÉS + BALLON ============================ */
+
+/* Couche SVG des tracés, superposée au terrain (sous les pastilles). */
+.routes-layer {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 3; pointer-events: none;
+}
+.routes-layer .route-path {
+  fill: none;
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: var(--len, 200);
+  stroke-dashoffset: var(--len, 200);
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.6));
+  opacity: .95;
+}
+.routes-layer.draw .route-path {
+  animation: routeDraw .6s ease forwards;
+}
+@keyframes routeDraw { to { stroke-dashoffset: 0; } }
+/* petite flèche en bout de tracé */
+.routes-layer .route-head {
+  opacity: 0;
+  transition: opacity .25s ease .5s;
+}
+.routes-layer.draw .route-head { opacity: 1; }
+
+/* Ballon animé. Positionné en % (left/top) par JS pendant la simulation. */
+.ball {
+  position: absolute; z-index: 7; top: 50%; left: 37%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: clamp(16px, 2.4vw, 26px);
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.6));
+  pointer-events: none; opacity: 0;
+  transition: opacity .2s ease;
+}
+.ball.live { opacity: 1; }
+
+/* Pastille "active" (celle qui porte le ballon) mise en valeur */
+.puck.carrier .fdisc { box-shadow: 0 0 0 3px var(--gold), 0 10px 24px rgba(0,0,0,.6); }
+
+/* Pendant la simulation, on neutralise le hover/clic des pastilles */
+.field-turf.simulating .puck { cursor: default; }
+.field-turf.simulating .puck:hover .puck-stand { transform: none; }
+
+/* ============================ BARRE PLAYBOOK ============================ */
+.playbook-bar {
+  max-width: 1120px; margin: 18px auto 0;
+  background: linear-gradient(180deg, rgba(20,27,42,.95), rgba(12,17,27,.95));
+  border: 1px solid var(--line); border-radius: 14px;
+  padding: 16px clamp(14px, 3vw, 22px); box-shadow: var(--shadow);
+}
+.pb-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.pb-title { font-family: "Teko"; font-weight: 700; font-size: 24px; letter-spacing: .5px; }
+.pb-sub { font-size: 13px; color: var(--muted); }
+.pb-sub b { color: var(--text); }
+.pb-side-toggle { margin-left: auto; display: inline-flex; background: rgba(0,0,0,.3); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.pb-side {
+  font: inherit; font-weight: 700; font-size: 13px; color: var(--muted);
+  background: none; border: none; cursor: pointer; padding: 6px 16px; border-radius: 999px;
+  transition: background .2s, color .2s;
+}
+.pb-side.active { background: var(--gold); color: #1a1205; }
+
+/* Liste des 5 plans */
+.pb-list { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+@media (max-width: 760px){ .pb-list { grid-template-columns: repeat(2, 1fr); } }
+.pb-card {
+  position: relative; text-align: left; cursor: pointer; font: inherit; color: var(--text);
+  background: linear-gradient(180deg, #1b2335, #121825);
+  border: 1px solid var(--line); border-radius: 12px; padding: 12px;
+  display: flex; flex-direction: column; gap: 6px;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.pb-card:hover { transform: translateY(-3px); border-color: rgba(245,215,110,.5); }
+.pb-card:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.pb-card.selected { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 10px 24px rgba(0,0,0,.5); }
+.pb-emoji { font-size: 24px; line-height: 1; }
+.pb-name { font-family: "Teko"; font-weight: 700; font-size: 18px; line-height: 1; }
+.pb-namefr { font-size: 12px; color: var(--muted); }
+.pb-tag { position: absolute; top: 10px; right: 10px; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  padding: 2px 7px; border-radius: 999px; background: rgba(0,0,0,.4); color: var(--muted); }
+.pb-card.selected .pb-tag { background: var(--gold); color: #1a1205; }
+
+/* Actions : description + bouton simuler */
+.pb-actions { display: flex; align-items: center; gap: 16px; margin-top: 14px; flex-wrap: wrap; }
+.pb-desc { flex: 1; min-width: 200px; font-size: 14px; color: var(--muted); line-height: 1.4; }
+.pb-sim {
+  font: inherit; font-weight: 700; font-size: 15px; letter-spacing: .5px;
+  color: #06121a; background: linear-gradient(180deg, #ffe9a8, #f5d76e);
+  border: none; border-radius: 999px; padding: 11px 24px; cursor: pointer;
+  box-shadow: 0 8px 20px rgba(245,215,110,.25); transition: transform .18s ease, filter .18s ease;
+  white-space: nowrap;
+}
+.pb-sim:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.05); }
+.pb-sim:active:not(:disabled) { transform: translateY(0); }
+.pb-sim:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+.pb-sim:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }

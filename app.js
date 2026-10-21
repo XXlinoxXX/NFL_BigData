@@ -23,6 +23,16 @@
   const rosterAway  = document.getElementById("rosterAway");
   const navPlaybook = document.getElementById("navPlaybook");
   const navAnalytics= document.getElementById("navAnalytics");
+  // --- Playbook / simulation ---
+  const fieldTurf   = document.querySelector(".field-turf");
+  const routesLayer = document.getElementById("routesLayer");
+  const ball        = document.getElementById("ball");
+  const pbList      = document.getElementById("pbList");
+  const pbDesc      = document.getElementById("pbDesc");
+  const pbSim       = document.getElementById("pbSim");
+  const pbSideEl    = document.getElementById("pbSide");
+  const pbSideHome  = document.getElementById("pbSideHome");
+  const pbSideAway  = document.getElementById("pbSideAway");
 
   /* ---------- Helpers ---------- */
   function rateClass(v) {
@@ -66,6 +76,10 @@
     buildFillers(TEAMS.away, playersAway);
     buildTeam(TEAMS.home, playersHome, LAYOUT.home);
     buildTeam(TEAMS.away, playersAway, LAYOUT.away);
+    // Re-dessine l'aperçu des tracés si un plan est sélectionné (et hors simu).
+    if (typeof selectedPb !== "undefined" && selectedPb && !simRunning) {
+      drawRoutes(selectedPb, simSide);
+    }
   }
 
   // Bandeaux d'équipe sur les bords du terrain
@@ -367,6 +381,269 @@
       </div>`;
   }
 
+  /* ========================================================================
+     PLAYBOOKS — sélection + simulation animée
+     ======================================================================== */
+
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const VB_H = 56.25;                 // hauteur du viewBox (16:9 -> 100 x 56.25)
+  const POS_ORDER = ["wr", "te", "rb"];
+
+  let simSide   = "home";             // équipe simulée : "home" | "away"
+  let selectedPb = null;              // playbook sélectionné
+  let simRunning = false;             // une animation est en cours ?
+
+  // Convertit un point {x,y} (en % terrain) vers les coords du viewBox SVG,
+  // en miroitant l'axe x pour l'équipe de droite (away).
+  function toField(pt, side) {
+    const x = side === "away" ? 100 - pt.x : pt.x;
+    return { x, y: (pt.y / 100) * VB_H };
+  }
+
+  // Construit une chaîne "path" lissée (courbe de Catmull-Rom -> Bézier).
+  function pathFrom(points) {
+    if (points.length < 2) return "";
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i - 1] || points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2] || p2;
+      const c1x = p1.x + (p2.x - p0.x) / 6;
+      const c1y = p1.y + (p2.y - p0.y) / 6;
+      const c2x = p2.x - (p3.x - p1.x) / 6;
+      const c2y = p2.y - (p3.y - p1.y) / 6;
+      d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
+    }
+    return d;
+  }
+
+  // Dessine les 3 tracés du playbook sélectionné pour le côté choisi.
+  function drawRoutes(pb, side) {
+    routesLayer.innerHTML = "";
+    routesLayer.classList.remove("draw");
+    const team = TEAMS[side];
+    const color = (team && team.color) || "#f5d76e";
+
+    POS_ORDER.forEach(posId => {
+      const raw = pb.routes[posId];
+      if (!raw) return;
+      const pts = raw.map(p => toField(p, side));
+      const d = pathFrom(pts);
+
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("class", "route-path");
+      path.setAttribute("d", d);
+      path.setAttribute("stroke", posId === pb.carrier ? "#f5d76e" : color);
+      routesLayer.appendChild(path);
+      // longueur réelle pour l'anim de dash
+      const len = path.getTotalLength();
+      path.style.setProperty("--len", len.toFixed(1));
+
+      // flèche en bout de tracé
+      const end = pts[pts.length - 1];
+      const prev = pts[pts.length - 2] || pts[0];
+      const ang = Math.atan2(end.y - prev.y, end.x - prev.x);
+      const head = document.createElementNS(SVG_NS, "polygon");
+      const s = 1.4;
+      const ax = end.x, ay = end.y;
+      const p1x = ax - s * Math.cos(ang - 0.5), p1y = ay - s * Math.sin(ang - 0.5);
+      const p2x = ax - s * Math.cos(ang + 0.5), p2y = ay - s * Math.sin(ang + 0.5);
+      head.setAttribute("class", "route-head");
+      head.setAttribute("points", `${ax},${ay} ${p1x},${p1y} ${p2x},${p2y}`);
+      head.setAttribute("fill", posId === pb.carrier ? "#f5d76e" : color);
+      routesLayer.appendChild(head);
+    });
+
+    // relance l'animation de tracé
+    void routesLayer.offsetWidth;
+    routesLayer.classList.add("draw");
+  }
+
+  function clearRoutes() {
+    routesLayer.innerHTML = "";
+    routesLayer.classList.remove("draw");
+  }
+
+  // Place une pastille (par poste) à une position % terrain.
+  function puckFor(side, posId) {
+    const container = side === "home" ? playersHome : playersAway;
+    const idx = POS_ORDER.indexOf(posId);
+    return container.querySelectorAll(".puck:not(.filler)")[idx] || null;
+  }
+
+  // easing doux
+  function easeInOut(t) { return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; }
+
+  // Interpole une polyligne (liste de points %) à l'avancement t (0..1).
+  function lerpPath(points, t) {
+    if (points.length === 1) return points[0];
+    // longueurs de segments
+    const segs = [];
+    let total = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+      const dx = points[i+1].x - points[i].x;
+      const dy = points[i+1].y - points[i].y;
+      const L = Math.hypot(dx, dy);
+      segs.push(L); total += L;
+    }
+    let dist = t * total, i = 0;
+    while (i < segs.length && dist > segs[i]) { dist -= segs[i]; i++; }
+    if (i >= segs.length) return points[points.length - 1];
+    const f = segs[i] ? dist / segs[i] : 0;
+    return {
+      x: points[i].x + (points[i+1].x - points[i].x) * f,
+      y: points[i].y + (points[i+1].y - points[i].y) * f
+    };
+  }
+
+  // Lance la simulation du playbook sélectionné.
+  function simulate() {
+    if (!selectedPb || simRunning) return;
+    const pb = selectedPb, side = simSide;
+    const team = TEAMS[side];
+    simRunning = true;
+    pbSim.disabled = true;
+    fieldTurf.classList.add("simulating");
+
+    // 1) dessiner les tracés
+    drawRoutes(pb, side);
+
+    // Tracés en % terrain pour chaque poste (pour déplacer les pastilles)
+    const routesPct = {};
+    POS_ORDER.forEach(posId => {
+      const raw = pb.routes[posId];
+      if (raw) routesPct[posId] = raw.map(p => ({ x: side === "away" ? 100 - p.x : p.x, y: p.y }));
+    });
+
+    // Pastille porteuse + point de snap (QB) miroité
+    const carrierPuck = puckFor(side, pb.carrier);
+    const qb = { x: side === "away" ? 100 - QB_SPOT.x : QB_SPOT.x, y: QB_SPOT.y };
+
+    // Réinitialise le marquage de porteur
+    [playersHome, playersAway].forEach(c =>
+      c.querySelectorAll(".puck.carrier").forEach(p => p.classList.remove("carrier")));
+
+    const DRAW_MS  = 650;   // temps pour tracer les routes avant de bouger
+    const MOVE_MS  = 1700;  // déplacement des joueurs le long des tracés
+    const SNAP_MS  = pb.play === "run" ? 420 : 620; // ballon QB -> porteur
+
+    // Position le ballon au snap
+    ball.classList.add("live");
+    setBallPct(qb);
+
+    const startAll = performance.now() + DRAW_MS;
+
+    function frame(now) {
+      const elapsed = now - startAll;
+      // phase 1 : les joueurs courent leurs tracés
+      const tMove = Math.max(0, Math.min(1, elapsed / MOVE_MS));
+      const e = easeInOut(tMove);
+      POS_ORDER.forEach(posId => {
+        const pts = routesPct[posId];
+        const puck = puckFor(side, posId);
+        if (!pts || !puck) return;
+        const p = lerpPath(pts, e);
+        puck.style.left = p.x + "%";
+        puck.style.top  = p.y + "%";
+      });
+
+      // phase 2 : le ballon. Snap QB -> porteur, puis suit le porteur.
+      if (elapsed < SNAP_MS) {
+        const ts = easeInOut(Math.max(0, elapsed) / SNAP_MS);
+        const carrierPts = routesPct[pb.carrier];
+        const target = carrierPts ? lerpPath(carrierPts, easeInOut(Math.min(1, elapsed / MOVE_MS))) : qb;
+        setBallPct({ x: qb.x + (target.x - qb.x) * ts, y: qb.y + (target.y - qb.y) * ts });
+      } else {
+        const carrierPts = routesPct[pb.carrier];
+        if (carrierPts) setBallPct(lerpPath(carrierPts, e));
+        if (carrierPuck && !carrierPuck.classList.contains("carrier")) {
+          carrierPuck.classList.add("carrier");
+        }
+      }
+
+      if (tMove < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        endSimulation();
+      }
+    }
+
+    function endSimulation() {
+      // petit délai puis remise en place
+      setTimeout(() => {
+        ball.classList.remove("live");
+        fieldTurf.classList.remove("simulating");
+        clearRoutes();
+        // replace les pastilles à leur position initiale
+        rebuildTeams();
+        simRunning = false;
+        pbSim.disabled = false;
+      }, 700);
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  // Place le ballon à une position en % terrain.
+  function setBallPct(p) {
+    ball.style.left = p.x + "%";
+    ball.style.top  = p.y + "%";
+    ball.style.transform = "translate(-50%, -50%) scale(1)";
+  }
+
+  // Rend les 5 cartes de playbook.
+  function renderPlaybookList() {
+    pbList.innerHTML = PLAYBOOKS.map((pb, i) => `
+      <button class="pb-card" type="button" role="option" data-id="${pb.id}" aria-selected="false">
+        <span class="pb-tag">${pb.play === "run" ? "COURSE" : "PASSE"}</span>
+        <span class="pb-emoji">${pb.emoji}</span>
+        <span class="pb-name">${pb.name}</span>
+        <span class="pb-namefr">${pb.nameFr}</span>
+      </button>`).join("");
+
+    pbList.querySelectorAll(".pb-card").forEach(card => {
+      card.addEventListener("click", () => {
+        if (simRunning) return;
+        selectPlaybook(card.dataset.id);
+      });
+    });
+  }
+
+  function selectPlaybook(id) {
+    selectedPb = PLAYBOOKS.find(p => p.id === id) || null;
+    pbList.querySelectorAll(".pb-card").forEach(c => {
+      const on = c.dataset.id === id;
+      c.classList.toggle("selected", on);
+      c.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    if (selectedPb) {
+      pbDesc.textContent = selectedPb.desc;
+      pbSim.disabled = false;
+      // aperçu statique des tracés (sans bouger les joueurs)
+      if (!simRunning) drawRoutes(selectedPb, simSide);
+    } else {
+      pbSim.disabled = true;
+    }
+  }
+
+  function setSide(side) {
+    if (simRunning) return;
+    simSide = side;
+    pbSideHome.classList.toggle("active", side === "home");
+    pbSideAway.classList.toggle("active", side === "away");
+    pbSideEl.innerHTML = side === "home"
+      ? 'Côté <b>DOMICILE</b>' : 'Côté <b>EXTÉRIEUR</b>';
+    if (selectedPb) drawRoutes(selectedPb, simSide);  // re-aperçu miroité
+  }
+
+  function buildPlaybookUI() {
+    renderPlaybookList();
+    pbSim.addEventListener("click", simulate);
+    pbSideHome.addEventListener("click", () => setSide("home"));
+    pbSideAway.addEventListener("click", () => setSide("away"));
+  }
+
   /* ---------- Événements globaux ---------- */
   backBtn.addEventListener("click", closeDetail);
   document.addEventListener("keydown", e => {
@@ -378,4 +655,5 @@
   // buildGamePicker -> fillGameSelect -> applyMatch -> rebuildTeams
   // se charge de construire figurants + cartes pour le match sélectionné.
   buildGamePicker();
+  buildPlaybookUI();
 })();
