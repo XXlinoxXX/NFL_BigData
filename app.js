@@ -247,24 +247,100 @@
     });
   }
 
-  /* ---------- Joueurs NON interactifs (figuration) ----------
-     Simples pastilles : poste + numéro, pas de clic, pas de note.     */
+  /* ---------- Noms complets des postes "figurants" ---------- */
+  const POS_NAMES = {
+    LT: { name: "Left Tackle",      fr: "Tackle gauche",     grp: "Ligne offensive" },
+    LG: { name: "Left Guard",       fr: "Garde gauche",      grp: "Ligne offensive" },
+    C:  { name: "Center",           fr: "Centre",            grp: "Ligne offensive" },
+    RG: { name: "Right Guard",      fr: "Garde droit",       grp: "Ligne offensive" },
+    RT: { name: "Right Tackle",     fr: "Tackle droit",      grp: "Ligne offensive" },
+    QB: { name: "Quarterback",      fr: "Quart-arrière",     grp: "Meneur de jeu" },
+    FB: { name: "Fullback",         fr: "Demi offensif",     grp: "Backfield" },
+    WR: { name: "Wide Receiver",    fr: "Receveur large",    grp: "Réception" },
+    DE: { name: "Defensive End",    fr: "Ailier défensif",   grp: "Ligne défensive" },
+    DT: { name: "Defensive Tackle", fr: "Tackle défensif",   grp: "Ligne défensive" },
+    LB: { name: "Linebacker",       fr: "Secondeur",         grp: "2e rideau" },
+    CB: { name: "Cornerback",       fr: "Demi de coin",      grp: "Secondaire" }
+  };
+
+  /* ---------- Joueurs de figuration — désormais CLIQUABLES ----------
+     Pastille ronde poste + numéro. Clic -> fiche simplifiée.           */
   function buildFillers(team, container) {
     (team.fillers || []).forEach(f => {
-      const el = document.createElement("div");
-      el.className = "puck filler " + (team.id === "home" ? "home" : "away");
-      el.style.left = f.x + "%";
-      el.style.top  = f.y + "%";
-      el.setAttribute("aria-hidden", "true");
-      el.innerHTML = `
+      const btn = document.createElement("button");
+      btn.className = "puck filler " + (team.id === "home" ? "home" : "away");
+      btn.style.left = f.x + "%";
+      btn.style.top  = f.y + "%";
+      btn.style.setProperty("--tc", team.color || "#888");
+      const meta = POS_NAMES[f.pos] || { name: f.pos, fr: "", grp: "" };
+      btn.setAttribute("aria-label", `${team.name} — ${meta.name} #${f.number}`);
+      btn.innerHTML = `
         <div class="puck-stand">
           <div class="puck-disc">
             <span class="filler-pos">${f.pos}</span>
             <span class="puck-num">#${f.number}</span>
           </div>
         </div>`;
-      container.appendChild(el);
+      btn.addEventListener("click", () => openFillerDetail(f, team));
+      container.appendChild(btn);
     });
+  }
+
+  /* ---------- Fiche simplifiée d'un figurant ---------- */
+  function openFillerDetail(f, team) {
+    const meta = POS_NAMES[f.pos] || { name: f.pos, fr: "", grp: "" };
+    detailInner.innerHTML = renderFillerDetail(f, team, meta);
+    detail.style.setProperty("--c1", team.color || "#555");
+    detail.style.setProperty("--c2", "#10151f");
+
+    navPlaybook.classList.remove("active");
+    navAnalytics.classList.add("active");
+
+    fieldView.classList.add("hidden");
+    detail.setAttribute("aria-hidden", "false");
+    void detail.offsetWidth;
+    detail.classList.add("active");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    backBtn.focus();
+  }
+
+  function renderFillerDetail(f, team, meta) {
+    const teamClass = team.id === "home" ? "home" : "away";
+    const side = team.id === "home" ? "DOMICILE" : "EXTÉRIEUR";
+    const abbr = team.abbr || (team.id === "home" ? "HOME" : "AWAY");
+    return `
+      <div class="detail-head">
+        <span class="team-badge ${teamClass}" style="box-shadow: inset 0 0 0 2px ${team.color || '#888'}">
+          ${abbr} · ${side}
+        </span>
+        <div class="dh-ovr"><div class="num">#${f.number}</div><div class="pos">${f.pos}</div></div>
+        <div class="dh-text">
+          <div class="who">${meta.grp || "Joueur de ligne"}</div>
+          <h2>${meta.name} <span class="fr">/ ${meta.fr}</span></h2>
+          <p class="tag">Joueur de figuration — poste non détaillé dans cet outil d'analyse.</p>
+        </div>
+        <div class="dh-emoji">🏈</div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="panel">
+          <h3>Informations <span class="pill">poste</span></h3>
+          <div class="arch"><b>Poste</b><span>${meta.name} (${f.pos})${meta.fr ? " — " + meta.fr : ""}</span></div>
+          <div class="arch"><b>Numéro</b><span>#${f.number}</span></div>
+          <div class="arch"><b>Groupe</b><span>${meta.grp || "—"}</span></div>
+          <div class="arch"><b>Équipe</b><span>${team.name} (${abbr})</span></div>
+        </div>
+        <div class="col-right">
+          <div class="panel">
+            <h3>Note <span class="pill">scouting</span></h3>
+            <p class="tag" style="margin:0">
+              Les fiches détaillées (attributs 0–99, stats tactiques, coaching) ne sont
+              disponibles que pour les <b>3 postes étudiés</b> : WR, TE et RB.
+              Clique sur l'un de leurs ronds sur le terrain pour l'analyse complète.
+            </p>
+          </div>
+        </div>
+      </div>`;
   }
 
   /* ---------- Fiche détaillée (zoom) ---------- */

@@ -274,7 +274,8 @@ body {
 }
 
 /* ---- Figurants (non interactifs) : plus petits et estompés ---- */
-.puck.filler { cursor: default; pointer-events: none; opacity: .82; }
+.puck.filler { cursor: pointer; opacity: .82; }
+.puck.filler:hover { opacity: 1; }
 .puck.filler .puck-disc {
   width: clamp(30px, 4.6vw, 46px); height: clamp(30px, 4.6vw, 46px);
   border-radius: 50%;
@@ -286,7 +287,7 @@ body {
 .puck.filler.away .puck-disc { box-shadow: 0 6px 14px rgba(0,0,0,.5), inset 0 0 0 2px var(--tc, var(--away)); }
 .filler-pos { font-family: "Teko"; font-weight: 700; font-size: clamp(11px, 1.7vw, 16px); color: #cfd8e6; }
 .puck.filler .puck-num { font-size: 11px; top: -5px; right: -5px; padding: 0 5px; }
-.puck.filler:hover .puck-stand { transform: none; }  /* pas d'effet survol */
+.puck.filler:hover .puck-stand { transform: translateY(-4px) scale(1.06); }
 
 .field-hint { text-align: center; color: var(--muted); font-size: 15px; margin-top: 16px; }
 .field-hint span { color: #7f93ac; }
