@@ -180,14 +180,6 @@ body {
 }
 
 /* libellés latéraux */
-.sideword {
-  position: absolute; top: 50%; font-family: "Teko"; font-weight: 700;
-  font-size: clamp(22px, 4.5vw, 54px); letter-spacing: 3px; color: rgba(255,255,255,.55);
-  text-shadow: 0 2px 6px rgba(0,0,0,.5); white-space: nowrap;
-}
-.sideword-left  { left: 10%;  transform: translateY(-50%) rotate(-90deg); transform-origin: left center; }
-.sideword-right { right: -2%; transform: translateY(-50%) rotate(90deg);  transform-origin: right center; color: rgba(255,220,220,.6); }
-
 /* ============================ PASTILLES JOUEURS ============================ */
 .players-home, .players-away { position: absolute; inset: 0; }
 
@@ -241,6 +233,19 @@ body {
 .puck-tag .nm { font-family: "Teko"; font-size: 17px; font-weight: 600; line-height: 1; }
 .puck-tag .p1 { font-size: 11px; letter-spacing: 1px; color: var(--gold); font-weight: 700; }
 .puck-tag .p2 { font-size: 11px; color: var(--muted); }
+
+/* ---- Figurants (non interactifs) : plus petits et estompés ---- */
+.puck.filler { cursor: default; pointer-events: none; opacity: .82; }
+.puck.filler .puck-disc {
+  width: clamp(30px, 4.6vw, 46px); height: clamp(30px, 4.6vw, 46px);
+  background: radial-gradient(circle at 35% 30%, #39414f, #171c28);
+  font-size: 0;
+}
+.puck.filler.home .puck-disc { box-shadow: 0 6px 14px rgba(0,0,0,.5), inset 0 0 0 2px rgba(47,109,246,.65); }
+.puck.filler.away .puck-disc { box-shadow: 0 6px 14px rgba(0,0,0,.5), inset 0 0 0 2px rgba(224,57,59,.65); }
+.filler-pos { font-family: "Teko"; font-weight: 700; font-size: clamp(11px, 1.7vw, 16px); color: #cfd8e6; }
+.puck.filler .puck-num { font-size: 11px; top: -5px; right: -5px; padding: 0 5px; }
+.puck.filler:hover .puck-stand { transform: rotateX(-42deg); }  /* pas d'effet survol */
 
 .field-hint { text-align: center; color: var(--muted); font-size: 15px; margin-top: -30px; }
 .field-hint span { color: #7f93ac; }

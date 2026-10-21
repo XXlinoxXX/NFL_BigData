@@ -68,14 +68,14 @@
      x = horizontal, y = vertical (haut/bas).                            */
   const LAYOUT = {
     home: [
-      { x: 26, y: 30 },  // WR (large, haut)
-      { x: 33, y: 50 },  // TE (rapproché, milieu)
-      { x: 24, y: 70 }   // RB (backfield, bas)
+      { x: 22, y: 15 },  // WR (large, tout en haut)
+      { x: 43, y: 28 },  // TE (rapproché, au bout de la ligne)
+      { x: 26, y: 50 }   // RB (backfield, derrière le QB)
     ],
     away: [
-      { x: 76, y: 32 },  // WR
-      { x: 68, y: 50 },  // TE
-      { x: 78, y: 70 }   // RB
+      { x: 72, y: 15 },  // WR (ici : receveur côté défense opposé, en haut)
+      { x: 66, y: 28 },  // TE
+      { x: 78, y: 50 }   // RB
     ]
   };
 
@@ -106,6 +106,26 @@
 
       btn.addEventListener("click", () => openDetail(pl, team));
       container.appendChild(btn);
+    });
+  }
+
+  /* ---------- Joueurs NON interactifs (figuration) ----------
+     Simples pastilles : poste + numéro, pas de clic, pas de note.     */
+  function buildFillers(team, container) {
+    (team.fillers || []).forEach(f => {
+      const el = document.createElement("div");
+      el.className = "puck filler " + (team.id === "home" ? "home" : "away");
+      el.style.left = f.x + "%";
+      el.style.top  = f.y + "%";
+      el.setAttribute("aria-hidden", "true");
+      el.innerHTML = `
+        <div class="puck-stand">
+          <div class="puck-disc">
+            <span class="filler-pos">${f.pos}</span>
+            <span class="puck-num">#${f.number}</span>
+          </div>
+        </div>`;
+      container.appendChild(el);
     });
   }
 
@@ -203,6 +223,8 @@
 
   /* ---------- Init ---------- */
   buildYardlines();
-  buildTeam(TEAMS.home, playersHome, LAYOUT.home);
+  buildFillers(TEAMS.home, playersHome);   // figurants d'abord (en dessous)
+  buildFillers(TEAMS.away, playersAway);
+  buildTeam(TEAMS.home, playersHome, LAYOUT.home);  // puis les 3 postes cliquables (au-dessus)
   buildTeam(TEAMS.away, playersAway, LAYOUT.away);
 })();

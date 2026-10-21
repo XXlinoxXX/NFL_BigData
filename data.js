@@ -247,6 +247,18 @@ const TEAMS = {
         player: { name: "D. Reyes", number: "22", line1: "RB", line2: "1 240 YDS · 11 TD" },
         delta: { "Vision": +2, "Agilité": +3, "Accélération": +2 }
       })
+    ],
+    // Les 8 autres joueurs de l'attaque (NON interactifs) — I-Formation.
+    // pos = étiquette affichée ; x/y = placement sur le terrain (%).
+    fillers: [
+      { pos: "LT", number: "76", x: 40, y: 35 },
+      { pos: "LG", number: "66", x: 40, y: 43 },
+      { pos: "C",  number: "55", x: 40, y: 50 },
+      { pos: "RG", number: "67", x: 40, y: 57 },
+      { pos: "RT", number: "73", x: 40, y: 65 },
+      { pos: "QB", number: "12", x: 33, y: 50 },
+      { pos: "FB", number: "44", x: 29, y: 50 },
+      { pos: "WR", number: "80", x: 22, y: 88 }
     ]
   },
   away: {
@@ -270,6 +282,17 @@ const TEAMS = {
         player: { name: "F. Moreau", number: "26", line1: "RB", line2: "1 010 YDS · 8 TD" },
         delta: { "Puissance": +3, "Vitesse": -2, "Vision": -1 }
       })
+    ],
+    // Les 8 autres joueurs de la défense (NON interactifs) — 4-3 Cover 2.
+    fillers: [
+      { pos: "DE", number: "91", x: 55, y: 32 },
+      { pos: "DT", number: "99", x: 57, y: 44 },
+      { pos: "DT", number: "93", x: 57, y: 56 },
+      { pos: "DE", number: "90", x: 55, y: 68 },
+      { pos: "LB", number: "54", x: 62, y: 38 },
+      { pos: "LB", number: "52", x: 64, y: 50 },
+      { pos: "LB", number: "58", x: 62, y: 62 },
+      { pos: "CB", number: "24", x: 72, y: 88 }
     ]
   }
 };
